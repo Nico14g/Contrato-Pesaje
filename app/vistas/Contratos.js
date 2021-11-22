@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Text, Button, Icon, SearchBar } from "react-native-elements";
 import ListaContratos from "../components/contrato/ListaContratos";
+
 export default function Contratos() {
   const navigation = useNavigation();
   const [search, setSearch] = useState("");
@@ -11,7 +12,7 @@ export default function Contratos() {
     <View>
       <View style={styles.container}>
         <View style={styles.item}>
-          <Text h2 style={styles.titulo}>
+          <Text h3 style={styles.titulo}>
             Documentos
           </Text>
         </View>
@@ -46,7 +47,7 @@ export default function Contratos() {
 }
 
 const styles = StyleSheet.create({
-  titulo: { marginLeft: "1rem" },
+  titulo: { marginLeft: "7%" },
   container: {
     flex: 1,
     flexDirection: "row",

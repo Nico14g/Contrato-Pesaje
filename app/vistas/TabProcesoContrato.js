@@ -63,7 +63,9 @@ export default function TabProcesoContrato() {
               style={styles.tabItem}
               onPress={() => setIndex(i)}
             >
-              <Animated.Text style={{ opacity }}>{route.title}</Animated.Text>
+              <Animated.Text style={{ opacity, color: "white" }}>
+                {route.title}
+              </Animated.Text>
             </TouchableOpacity>
           );
         })}
@@ -87,6 +89,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tabBar: {
+    alignItems: "center",
+    backgroundColor: "#1565c0",
+    height: "10%",
     flexDirection: "row",
     paddingTop: Constants.statusBarHeight,
   },

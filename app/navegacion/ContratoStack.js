@@ -1,5 +1,6 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Icon } from "react-native-elements";
 import Contratos from "../vistas/contratos";
 import TabProcesoContrato from "../vistas/TabProcesoContrato";
 import EdicionContrato from "../vistas/EdicionContrato";
@@ -26,7 +27,15 @@ export default function ContratoStack() {
       <Stack.Screen
         name="TabProcesoContrato"
         component={TabProcesoContrato}
-        options={{ title: "Creación Contrato", headerBackVisible: true }}
+        options={{
+          title: "Creación Contrato",
+          headerBackVisible: true,
+          headerStyle: { backgroundColor: "#2f3bc7" },
+          headerTintColor: "#ffffff",
+          headerTitleStyle: {
+            color: "white",
+          },
+        }}
       />
       <Stack.Screen
         name="EdicionContrato"

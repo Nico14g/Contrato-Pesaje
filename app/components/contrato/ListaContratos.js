@@ -31,7 +31,7 @@ export default function ListaContratos(props) {
   );
 }
 
-function Contrato(proos) {
+function Contrato(props) {
   const { contrato } = props;
   return (
     <View>

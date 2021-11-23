@@ -23,7 +23,7 @@ export default function ListaContratos(props) {
         />
       ) : (
         <View style={styles.loaderContratos}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator color="blue" size="large" />
           <Text>Cargando contratos</Text>
         </View>
       )}
@@ -40,5 +40,5 @@ function Contrato(props) {
   );
 }
 const styles = StyleSheet.create({
-  loaderContratos: { marginTop: 10, marginBottom: 10, alignItems: "center" },
+  loaderContratos: { paddingTop: 20, alignItems: "center" },
 });

@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Icon } from "react-native-elements";
 import ContratoStack from "./ContratoStack";
-import Pesaje from "../vistas/pesaje";
+import Pesaje from "../vistas/Pesaje";
 
 const Tab = createBottomTabNavigator();
 

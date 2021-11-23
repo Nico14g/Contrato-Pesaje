@@ -9,7 +9,7 @@ export default function Contratos() {
   const [search, setSearch] = useState("");
 
   return (
-    <View>
+    <>
       <View style={styles.container}>
         <View style={styles.item}>
           <Text h3 style={styles.titulo}>
@@ -28,6 +28,7 @@ export default function Contratos() {
                 color="white"
               />
             }
+            titleStyle={{ fontSize: 14 }}
             title="Nuevo"
           />
         </View>
@@ -42,7 +43,7 @@ export default function Contratos() {
         value={search}
       />
       <ListaContratos></ListaContratos>
-    </View>
+    </>
   );
 }
 
@@ -53,35 +54,33 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     alignItems: "flex-start",
-    marginBottom: "15px",
+    maxHeight: "10%",
   },
   item: {
     width: "60%",
   },
   nuevo: {
-    alignContent: "center",
-    alignSelf: "center",
     alignItems: "center",
     width: "40%",
   },
   boton: {
-    width: "100px",
-    height: "32px",
-    marginTop: "10px",
+    width: 80,
+    height: 35,
+    marginTop: 10,
     backgroundColor: "#99c781",
     borderColor: "#3f9d2f",
-    shadowOffset: { width: -1, height: 3 },
-    shadowRadius: 4,
+    shadowOffset: { width: -1, height: 4 },
+    shadowRadius: 6,
     shadowColor: "gray",
-    borderRadius: "20px",
+    borderRadius: 20,
   },
   containerSearchBar: {
-    marginTop: "15px",
-    marginBottom: "15px",
+    marginTop: 15,
+    marginBottom: 15,
     alignSelf: "center",
-    alignItems: "centers",
+    alignItems: "center",
     width: "90%",
-    padding: "0",
+    padding: 0,
   },
   inputSearchBar: {
     backgroundColor: "#ffffff",

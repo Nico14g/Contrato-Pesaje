@@ -1,7 +1,7 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Icon } from "react-native-elements";
-import Contratos from "../vistas/contratos";
+import Contratos from "../vistas/Contratos";
 import TabProcesoContrato from "../vistas/TabProcesoContrato";
 import EdicionContrato from "../vistas/EdicionContrato";
 
@@ -19,7 +19,7 @@ export default function ContratoStack() {
           headerStyle: { backgroundColor: "#f1f3f9" },
           headerTitleStyle: {
             color: "black",
-            fontSize: "30px",
+            fontSize: 30,
             marginTop: 30,
           },
         }}

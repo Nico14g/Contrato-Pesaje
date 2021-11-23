@@ -14,28 +14,11 @@ import Plantilla from "../components/procesoContrato/Plantilla";
 import Servicio from "../components/procesoContrato/Servicio";
 import Constants from "expo-constants";
 
-const PrimeraRuta = () => <Plantilla />;
-
-const SegundaRuta = () => <Empresa />;
-
-const TerceraRuta = () => <Empleado />;
-
-const CuartaRuta = () => <Servicio />;
-
-const QuintaRuta = () => <Anexos />;
-
-const renderScene = SceneMap({
-  plantilla: PrimeraRuta,
-  empresa: SegundaRuta,
-  empleado: TerceraRuta,
-  servicio: CuartaRuta,
-  anexos: QuintaRuta,
-});
-
 export default function TabProcesoContrato() {
   const layout = useWindowDimensions();
-
+  const [plantillaSelect, setPlantillaSelect] = useState("");
   const [index, setIndex] = useState(0);
+
   const [routes] = React.useState([
     { key: "plantilla", title: "Plantilla" },
     { key: "empresa", title: "Empresa" },
@@ -43,6 +26,30 @@ export default function TabProcesoContrato() {
     { key: "servicio", title: "Servicio" },
     { key: "anexos", title: "Otros" },
   ]);
+
+  const PrimeraRuta = () => (
+    <Plantilla
+      setIndex={setIndex}
+      plantillaSelect={plantillaSelect}
+      setPlantillaSelect={setPlantillaSelect}
+    />
+  );
+
+  const SegundaRuta = () => <Empresa />;
+
+  const TerceraRuta = () => <Empleado />;
+
+  const CuartaRuta = () => <Servicio />;
+
+  const QuintaRuta = () => <Anexos />;
+
+  const renderScene = SceneMap({
+    plantilla: PrimeraRuta,
+    empresa: SegundaRuta,
+    empleado: TerceraRuta,
+    servicio: CuartaRuta,
+    anexos: QuintaRuta,
+  });
 
   const renderTabBar = (props) => {
     const inputRange = props.navigationState.routes.map((x, i) => i);
@@ -61,7 +68,7 @@ export default function TabProcesoContrato() {
             <TouchableOpacity
               key={i}
               style={styles.tabItem}
-              onPress={() => setIndex(i)}
+              onPress={() => console.log("a")}
             >
               <Animated.Text style={{ opacity, color: "white" }}>
                 {route.title}
@@ -93,11 +100,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#1565c0",
     height: "10%",
     flexDirection: "row",
-    paddingTop: Constants.statusBarHeight,
   },
   tabItem: {
     flex: 1,
     alignItems: "center",
-    padding: 16,
+    alignSelf: "center",
   },
 });

@@ -12,7 +12,6 @@ import Empleado from "../components/procesoContrato/Empleado";
 import Empresa from "../components/procesoContrato/Empresa";
 import Plantilla from "../components/procesoContrato/Plantilla";
 import Servicio from "../components/procesoContrato/Servicio";
-import Constants from "expo-constants";
 
 export default function TabProcesoContrato() {
   const layout = useWindowDimensions();
@@ -82,6 +81,7 @@ export default function TabProcesoContrato() {
 
   return (
     <TabView
+      swipeEnabled={false}
       navigationState={{ index, routes }}
       renderScene={renderScene}
       onIndexChange={setIndex}

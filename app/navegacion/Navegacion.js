@@ -24,7 +24,9 @@ export default function Navigation() {
         <Tab.Screen
           name="ContratoStack"
           component={ContratoStack}
-          options={{ title: "Contratos" }}
+          options={{
+            title: "Contratos",
+          }}
         />
         <Tab.Screen name="Pesaje" component={Pesaje} />
       </Tab.Navigator>

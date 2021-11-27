@@ -93,12 +93,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: "20%",
   },
-  nuevo: {
-    alignContent: "center",
-    alignSelf: "center",
-    alignItems: "center",
-    width: "40%",
-  },
   loaderPlantilla: { marginTop: 10, marginBottom: 10, alignItems: "center" },
   nombreText: {
     fontWeight: "bold",

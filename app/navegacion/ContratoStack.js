@@ -40,7 +40,10 @@ export default function ContratoStack() {
       <Stack.Screen
         name="EdicionContrato"
         component={EdicionContrato}
-        options={{ title: "Editor Contrato", headerBackVisible: true }}
+        options={{
+          title: "Editor Contrato",
+          headerBackVisible: true,
+        }}
       />
     </Stack.Navigator>
   );

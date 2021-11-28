@@ -1,13 +1,9 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Text, SafeAreaView } from "react-native";
+import React from "react";
+import { View, StyleSheet, Text } from "react-native";
 import { Switch } from "react-native-elements";
-import { FormularioEmpresa } from "../formularios/FormularioEmpresa";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export const TituloSwitch = (props) => {
   const { isEnabled, toggleSwitch, title } = props;
-  //const [isEnabled, setIsEnabled] = useState(false);
-  //const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   return (
     <>
       <View style={styles.container}>

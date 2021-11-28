@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
-import { Input, Icon, Button, Switch } from "react-native-elements";
-import { Formik, useFormik } from "formik";
+import { Input, Icon, Button } from "react-native-elements";
+import { validateRut, formatRut } from "@fdograph/rut-utilities";
+import { Formik } from "formik";
 
 export const FormularioEmpresa = (props) => {
-  const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+  const { empresas, setEmpresas } = props;
+  const [validateRutRazon, setValidateRutRazon] = useState(false);
+  const [validateRutRepresentante, setValidateRutRepresentante] =
+    useState(false);
   return (
     <Formik
       initialValues={{
@@ -19,7 +22,14 @@ export const FormularioEmpresa = (props) => {
       }}
       onSubmit={(values) => console.log(values)}
     >
-      {({ handleChange, handleBlur, handleSubmit, values }) => (
+      {({
+        handleChange,
+        handleBlur,
+        handleSubmit,
+        getFieldProps,
+        setFieldValue,
+        values,
+      }) => (
         <>
           <ScrollView style={styles.scrollView}>
             <Input
@@ -40,7 +50,16 @@ export const FormularioEmpresa = (props) => {
               placeholderTextColor="gray"
               placeholder="Rut Razón Social"
               onChangeText={handleChange("rutRazonSocial")}
-              onBlur={handleBlur("rutRazonSocial")}
+              onBlur={() => {
+                setValidateRutRazon(
+                  !validateRut(getFieldProps("rutRazonSocial").value)
+                );
+                setFieldValue(
+                  "rutRazonSocial",
+                  formatRut(getFieldProps("rutRazonSocial").value)
+                );
+              }}
+              errorMessage={validateRutRazon && "Rut no válido"}
               value={values.rutRazonSocial}
             />
 
@@ -73,7 +92,16 @@ export const FormularioEmpresa = (props) => {
               placeholderTextColor="gray"
               placeholder="Rut Representante Legal"
               onChangeText={handleChange("rutRepresentante")}
-              onBlur={handleBlur("rutRepresentante")}
+              onBlur={() => {
+                setValidateRutRepresentante(
+                  !validateRut(getFieldProps("rutRepresentante").value)
+                );
+                setFieldValue(
+                  "rutRazonSocial",
+                  formatRut(getFieldProps("rutRazonSocial").value)
+                );
+              }}
+              errorMessage={validateRutRepresentante && "Rut no válido"}
               value={values.rutRepresentante}
             />
 

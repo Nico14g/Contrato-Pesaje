@@ -1,13 +1,26 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Text, SafeAreaView } from "react-native";
-import { Switch } from "react-native-elements";
+import React, { useState, useEffect } from "react";
+import { StyleSheet } from "react-native";
 import { FormularioEmpresa } from "../formularios/FormularioEmpresa";
 import { TituloSwitch } from "./TituloSwitch";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { db } from "../../api/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export default function Empresa(props) {
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+  const [empresas, setEmpresas] = useState("");
+
+  useEffect(() => {
+    async function consulta() {
+      let data = [];
+      const querySnapshot = await getDocs(collection(db, "Empresa"));
+      querySnapshot.forEach((doc) => {
+        data.push(doc.data());
+      });
+      setEmpresas(data);
+    }
+    consulta();
+  }, []);
   return (
     <>
       <TituloSwitch
@@ -15,7 +28,7 @@ export default function Empresa(props) {
         toggleSwitch={toggleSwitch}
         title="Datos Empresa"
       />
-      <FormularioEmpresa />
+      <FormularioEmpresa empresas={empresas} setEmpresas={setEmpresas} />
     </>
   );
 }

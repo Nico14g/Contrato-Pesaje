@@ -15,7 +15,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export const ListaPlantillas = (props) => {
   const { plantillas, setIndex, plantillaSelect, setPlantillaSelect } = props;
-  //const plantillas = ["a", "d", "c  "];
   return (
     <SafeAreaView style={styles.container}>
       {size(plantillas) > 0 ? (

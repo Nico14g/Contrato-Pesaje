@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet } from "react-native";
 import { FormularioEmpresa } from "../formularios/FormularioEmpresa";
 import { TituloSwitch } from "./TituloSwitch";
 import { db } from "../../api/firebase";
 import { collection, getDocs } from "firebase/firestore";
 
 export default function Empresa(props) {
+  const { empresa, setEmpresa, setIndex } = props;
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const [empresas, setEmpresas] = useState("");
@@ -28,12 +28,16 @@ export default function Empresa(props) {
         toggleSwitch={toggleSwitch}
         title="Datos Empresa"
       />
-      <FormularioEmpresa empresas={empresas} setEmpresas={setEmpresas} />
+      <FormularioEmpresa
+        empresas={empresas}
+        setEmpresas={setEmpresas}
+        empresa={empresa}
+        setEmpresa={setEmpresa}
+        setIndex={setIndex}
+      />
     </>
   );
 }
-
-const styles = StyleSheet.create({});
 
 /*<View style={styles.container}>
         <View style={styles.item}>

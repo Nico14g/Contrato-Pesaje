@@ -1,44 +1,48 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Text } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Text,
+  createElement,
+} from "react-native";
 import { Input, Icon, Button } from "react-native-elements";
 import { validateRut, formatRut } from "@fdograph/rut-utilities";
 import { useFormik, FormikProvider } from "formik";
 import { db } from "../../api/firebase";
 import { doc, setDoc } from "firebase/firestore";
+import { Picker } from "@react-native-picker/picker";
 
-export const FormularioEmpresa = (props) => {
-  const { empresas, setEmpresas, empresa, setEmpresa, setIndex } = props;
-  const [validateRutRazon, setValidateRutRazon] = useState(false);
-  const [validateRutRepresentante, setValidateRutRepresentante] =
-    useState(false);
+export const FormularioEmpleado = (props) => {
+  const { empleados, setEmpleados, empleado, setEmpleado, setIndex } = props;
+  const [validateRutEmpleado, setValidateRutEmpleado] = useState(false);
   const [isValid, setIsValid] = useState(true);
   const [isPressed, setIsPressed] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState();
 
   const validar = () => {
-    setIndex(2);
+    setIndex(3);
     /*setIsPressed(true);
     setIsValid(validarEntradas());
     if (isValid && !validateRutRazon && !validateRutRepresentante) {
       almacenarDatosBD();
-      setIndex(2);
+      setIndex(3);
     }*/
   };
 
   const almacenarDatosBD = async () => {
-    await setDoc(
-      doc(db, "Empresa", getFieldProps("rutRazonSocial").value),
-      values
-    );
+    await setDoc(doc(db, "Empleados", getFieldProps("rut").value), values);
   };
 
   const validarEntradas = () => {
     if (
-      getFieldProps("razonSocial").value !== "" &&
-      getFieldProps("rutRazonSocial").value !== "" &&
-      getFieldProps("ciudad").value !== "" &&
-      getFieldProps("representante").value !== "" &&
-      getFieldProps("rutRepresentante").value !== "" &&
-      getFieldProps("cargoRepresentante").value !== "" &&
+      getFieldProps("nombreEmpleado").value !== "" &&
+      getFieldProps("rut").value !== "" &&
+      getFieldProps("numeroDocumento").value !== "" &&
+      getFieldProps("nacionalidad").value !== "" &&
+      getFieldProps("fechaNacimiento").value !== "" &&
+      getFieldProps("profesionOficio").value !== "" &&
+      getFieldProps("estadoCivil").value !== "" &&
       getFieldProps("direccion").value !== ""
     ) {
       return true;
@@ -48,12 +52,13 @@ export const FormularioEmpresa = (props) => {
 
   const formik = useFormik({
     initialValues: {
-      razonSocial: "",
-      rutRazonSocial: "",
-      ciudad: "",
-      representante: "",
-      rutRepresentante: "",
-      cargoRepresentante: "",
+      nombreEmpleado: "",
+      rut: "",
+      numeroDocumento: "",
+      nacionalidad: "",
+      fechaNacimiento: "",
+      profesionOficio: "",
+      estadoCivil: "",
       direccion: "",
     },
   });
@@ -70,10 +75,10 @@ export const FormularioEmpresa = (props) => {
             inputContainerStyle={styles.inputContainer}
             style={styles.input}
             placeholderTextColor="gray"
-            placeholder="Razón Social"
-            onChangeText={handleChange("razonSocial")}
-            onBlur={handleBlur("razonSocial")}
-            value={values.razonSocial}
+            placeholder="Nombre Empleado"
+            onChangeText={handleChange("nombreEmpleado")}
+            onBlur={handleBlur("nombreEmpleado")}
+            value={values.nombreEmpleado}
           />
 
           <Input
@@ -81,19 +86,14 @@ export const FormularioEmpresa = (props) => {
             inputContainerStyle={styles.inputContainer}
             style={styles.input}
             placeholderTextColor="gray"
-            placeholder="Rut Razón Social"
-            onChangeText={handleChange("rutRazonSocial")}
+            placeholder="Rut"
+            onChangeText={handleChange("rut")}
             onBlur={() => {
-              setValidateRutRazon(
-                !validateRut(getFieldProps("rutRazonSocial").value)
-              );
-              setFieldValue(
-                "rutRazonSocial",
-                formatRut(getFieldProps("rutRazonSocial").value)
-              );
+              setValidateRutEmpleado(!validateRut(getFieldProps("rut").value));
+              setFieldValue("rut", formatRut(getFieldProps("rut").value));
             }}
-            errorMessage={validateRutRazon && "Rut no válido"}
-            value={values.rutRazonSocial}
+            errorMessage={validateRutEmpleado && "Rut no válido"}
+            value={values.rut}
           />
 
           <Input
@@ -101,10 +101,10 @@ export const FormularioEmpresa = (props) => {
             inputContainerStyle={styles.inputContainer}
             style={styles.input}
             placeholderTextColor="gray"
-            placeholder="Ciudad"
-            onChangeText={handleChange("ciudad")}
-            onBlur={handleBlur("ciudad")}
-            value={values.ciudad}
+            placeholder="Número de documento"
+            onChangeText={handleChange("numeroDocumento")}
+            onBlur={handleBlur("numeroDocumento")}
+            value={values.numeroDocumento}
           />
 
           <Input
@@ -112,10 +112,10 @@ export const FormularioEmpresa = (props) => {
             inputContainerStyle={styles.inputContainer}
             style={styles.input}
             placeholderTextColor="gray"
-            placeholder="Representante Legal"
-            onChangeText={handleChange("representante")}
-            onBlur={handleBlur("representante")}
-            value={values.representante}
+            placeholder="Nacionalidad"
+            onChangeText={handleChange("nacionalidad")}
+            onBlur={handleBlur("nacionalidad")}
+            value={values.nacionalidad}
           />
 
           <Input
@@ -123,19 +123,10 @@ export const FormularioEmpresa = (props) => {
             inputContainerStyle={styles.inputContainer}
             style={styles.input}
             placeholderTextColor="gray"
-            placeholder="Rut Representante Legal"
-            onChangeText={handleChange("rutRepresentante")}
-            onBlur={() => {
-              setValidateRutRepresentante(
-                !validateRut(getFieldProps("rutRepresentante").value)
-              );
-              setFieldValue(
-                "rutRepresentante",
-                formatRut(getFieldProps("rutRepresentante").value)
-              );
-            }}
-            errorMessage={validateRutRepresentante && "Rut no válido"}
-            value={values.rutRepresentante}
+            placeholder="Fecha de Nacimiento"
+            onChangeText={handleChange("fechaNacimiento")}
+            onBlur={handleBlur("fechaNacimiento")}
+            value={values.fechaNacimiento}
           />
 
           <Input
@@ -143,10 +134,10 @@ export const FormularioEmpresa = (props) => {
             inputContainerStyle={styles.inputContainer}
             style={styles.input}
             placeholderTextColor="gray"
-            placeholder="Cargo del Representante"
-            onChangeText={handleChange("cargoRepresentante")}
-            onBlur={handleBlur("cargoRepresentante")}
-            value={values.cargoRepresentante}
+            placeholder="Profesión u Oficio"
+            onChangeText={handleChange("profesionOficio")}
+            onBlur={handleBlur("profesionOficio")}
+            value={values.profesionOficio}
           />
 
           <Input
@@ -154,17 +145,38 @@ export const FormularioEmpresa = (props) => {
             inputContainerStyle={styles.inputContainer}
             style={styles.input}
             placeholderTextColor="gray"
-            placeholder="Dirección Empresa"
+            placeholder="Estado Civil"
+            onChangeText={handleChange("estadoCivil")}
+            onBlur={handleBlur("estadoCivil")}
+            value={values.estadoCivil}
+          />
+
+          <Input
+            containerStyle={styles.container}
+            inputContainerStyle={styles.inputContainer}
+            style={styles.input}
+            placeholderTextColor="gray"
+            placeholder="Dirección"
             onChangeText={handleChange("direccion")}
             onBlur={handleBlur("direccion")}
             value={values.direccion}
           />
+          <Picker
+            selectedValue={selectedLanguage}
+            onValueChange={(itemValue, itemIndex) =>
+              setSelectedLanguage(itemValue)
+            }
+          >
+            <Picker.Item label="Java" value="java" />
+            <Picker.Item label="JavaScript" value="js" />
+          </Picker>
         </ScrollView>
         <View style={styles.bottomContainer}>
           <View style={styles.item}>
-            {isPressed && !isValid && (
-              <Text style={{ color: "red" }}>Faltan campos por completar</Text>
-            )}
+            {
+              //isPressed && !isValid && (
+              //<Text style={{ color: "red" }}>Faltan campos por completar</Text>)
+            }
           </View>
           <View style={styles.item2}>
             <Button

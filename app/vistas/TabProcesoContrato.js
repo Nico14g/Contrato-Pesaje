@@ -17,6 +17,15 @@ export default function TabProcesoContrato() {
   const layout = useWindowDimensions();
   const [plantillaSelect, setPlantillaSelect] = useState("");
   const [index, setIndex] = useState(0);
+  const [empresa, setEmpresa] = useState({
+    cargoRepresentante: "",
+    ciudad: "",
+    direccion: "",
+    razonSocial: "",
+    representante: "",
+    rutRazonSocial: "",
+    rutRepresentante: "",
+  });
 
   const [routes] = React.useState([
     { key: "plantilla", title: "Plantilla" },
@@ -34,11 +43,13 @@ export default function TabProcesoContrato() {
     />
   );
 
-  const SegundaRuta = () => <Empresa />;
+  const SegundaRuta = () => (
+    <Empresa empresa={empresa} setEmpresa={setEmpresa} setIndex={setIndex} />
+  );
 
-  const TerceraRuta = () => <Empleado />;
+  const TerceraRuta = () => <Empleado setIndex={setIndex} />;
 
-  const CuartaRuta = () => <Servicio />;
+  const CuartaRuta = () => <Servicio setIndex={setIndex} />;
 
   const QuintaRuta = () => <Anexos />;
 

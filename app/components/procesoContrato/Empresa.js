@@ -1,26 +1,54 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FormularioEmpresa } from "../formularios/FormularioEmpresa";
 import { TituloSwitch } from "./TituloSwitch";
 import { db } from "../../api/firebase";
 import { collection, getDocs } from "firebase/firestore";
 
 export default function Empresa(props) {
-  const { empresa, setEmpresa, setIndex } = props;
+  const { setIndex } = props;
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
-  const [empresas, setEmpresas] = useState("");
+  const [empresas, setEmpresas] = useState([]);
+  const componentMounted = useRef(true);
 
   useEffect(() => {
-    async function consulta() {
+    if (componentMounted.current) {
       let data = [];
+      getDocs(collection(db, "Empresa")).then((documentos) => {
+        documentos.docs.forEach((doc) => data.push(doc.data()));
+        setEmpresas(data);
+      });
+    }
+    return () => {
+      componentMounted.current = false;
+    };
+  }, []);
+
+  const consulta = async () => {
+    try {
+      let data = [];
+
+      getDocs(collection(db, "Empresa")).then((documentos) => {
+        documentos.docs.forEach((doc) => data.push(doc.data()));
+        setEmpresas(data);
+      });
+
+      const querySnapshot = await getDocs(collection(db, "cities"));
+      querySnapshot.forEach((doc) => {
+        data.push(doc.data());
+        setEmpresas([...data]);
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  /*let data = [];
       const querySnapshot = await getDocs(collection(db, "Empresa"));
       querySnapshot.forEach((doc) => {
         data.push(doc.data());
       });
-      setEmpresas(data);
-    }
-    consulta();
-  }, []);
+      setEmpresas(data); */
   return (
     <>
       <TituloSwitch
@@ -31,8 +59,6 @@ export default function Empresa(props) {
       <FormularioEmpresa
         empresas={empresas}
         setEmpresas={setEmpresas}
-        empresa={empresa}
-        setEmpresa={setEmpresa}
         setIndex={setIndex}
       />
     </>

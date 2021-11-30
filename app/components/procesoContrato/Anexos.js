@@ -1,10 +1,40 @@
-import React from "react";
-import { View, Text } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { FormularioAnexos } from "../formularios/FormularioAnexos";
+import { TituloSwitch } from "./TituloSwitch";
+import { db } from "../../api/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export default function Anexos() {
+  const [isEnabled, setIsEnabled] = useState(false);
+  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+  const [anexos, setAnexos] = useState("");
+  const componentMounted = useRef(true);
+
+  useEffect(() => {
+    if (componentMounted.current) {
+      consulta();
+    }
+    return () => {
+      componentMounted.current = false;
+    };
+  }, []);
+
+  async function consulta() {
+    let data = [];
+    const querySnapshot = await getDocs(collection(db, "Anexos"));
+    querySnapshot.forEach((doc) => {
+      data.push(doc.data());
+    });
+    setAnexos(data);
+  }
   return (
-    <View>
-      <Text>Anexos</Text>
-    </View>
+    <>
+      <TituloSwitch
+        isEnabled={isEnabled}
+        toggleSwitch={toggleSwitch}
+        title="Otros Datos"
+      />
+      <FormularioAnexos anexos={anexos} setAnexos={setAnexos} />
+    </>
   );
 }

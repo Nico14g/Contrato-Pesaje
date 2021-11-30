@@ -17,15 +17,6 @@ export default function TabProcesoContrato() {
   const layout = useWindowDimensions();
   const [plantillaSelect, setPlantillaSelect] = useState("");
   const [index, setIndex] = useState(0);
-  const [empresa, setEmpresa] = useState({
-    cargoRepresentante: "",
-    ciudad: "",
-    direccion: "",
-    razonSocial: "",
-    representante: "",
-    rutRazonSocial: "",
-    rutRepresentante: "",
-  });
 
   const [routes] = React.useState([
     { key: "plantilla", title: "Plantilla" },
@@ -43,9 +34,7 @@ export default function TabProcesoContrato() {
     />
   );
 
-  const SegundaRuta = () => (
-    <Empresa empresa={empresa} setEmpresa={setEmpresa} setIndex={setIndex} />
-  );
+  const SegundaRuta = () => <Empresa setIndex={setIndex} />;
 
   const TerceraRuta = () => <Empleado setIndex={setIndex} />;
 
@@ -53,13 +42,36 @@ export default function TabProcesoContrato() {
 
   const QuintaRuta = () => <Anexos />;
 
-  const renderScene = SceneMap({
+  /*const renderScene = SceneMap({
     plantilla: PrimeraRuta,
     empresa: SegundaRuta,
     empleado: TerceraRuta,
     servicio: CuartaRuta,
     anexos: QuintaRuta,
   });
+  */
+  const renderScene = ({ route }) => {
+    switch (route.key) {
+      case "plantilla":
+        return (
+          <Plantilla
+            setIndex={setIndex}
+            plantillaSelect={plantillaSelect}
+            setPlantillaSelect={setPlantillaSelect}
+          />
+        );
+      case "empresa":
+        return <Empresa setIndex={setIndex} />;
+      case "empleado":
+        return <Empleado setIndex={setIndex} />;
+      case "servicio":
+        return <Servicio setIndex={setIndex} />;
+      case "anexos":
+        return <Anexos />;
+      default:
+        return null;
+    }
+  };
 
   const renderTabBar = (props) => {
     const inputRange = props.navigationState.routes.map((x, i) => i);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, StyleSheet, Text, Platform } from "react-native";
 import { Icon, SearchBar, Button } from "react-native-elements";
 import { ListaPlantillas } from "../seleccionPlantilla/ListaPlantillas";
@@ -9,10 +9,16 @@ export default function Plantilla(props) {
   const { setIndex, plantillaSelect, setPlantillaSelect } = props;
   const [search, setSearch] = useState("");
   const [plantillas, setPlantillas] = useState([]);
+  const componentMounted = useRef(true);
   const STORAGE_KEY = "@plantillas";
 
   useEffect(() => {
-    readData.apply();
+    if (componentMounted.current) {
+      readData();
+    }
+    return () => {
+      componentMounted.current = false;
+    };
   }, []);
 
   const readData = async () => {

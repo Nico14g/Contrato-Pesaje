@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FormularioEmpleado } from "../formularios/FormularioEmpleado";
 import { TituloSwitch } from "./TituloSwitch";
 import { db } from "../../api/firebase";
@@ -9,18 +9,25 @@ export default function Empleado(props) {
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const [empleados, setEmpleados] = useState("");
+  const componentMounted = useRef(true);
 
   useEffect(() => {
-    async function consulta() {
-      let data = [];
-      const querySnapshot = await getDocs(collection(db, "Empleados"));
-      querySnapshot.forEach((doc) => {
-        data.push(doc.data());
-      });
-      setEmpleados(data);
+    if (componentMounted.current) {
+      consulta();
     }
-    consulta();
+    return () => {
+      componentMounted.current = false;
+    };
   }, []);
+
+  async function consulta() {
+    let data = [];
+    const querySnapshot = await getDocs(collection(db, "Empleados"));
+    querySnapshot.forEach((doc) => {
+      data.push(doc.data());
+    });
+    setEmpleados(data);
+  }
   return (
     <>
       <TituloSwitch

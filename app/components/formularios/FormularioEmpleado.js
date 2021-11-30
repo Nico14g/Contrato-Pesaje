@@ -1,37 +1,37 @@
 import React, { useState } from "react";
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  Text,
-  createElement,
-} from "react-native";
+import { View, StyleSheet, ScrollView, Text } from "react-native";
 import { Input, Icon, Button } from "react-native-elements";
 import { validateRut, formatRut } from "@fdograph/rut-utilities";
 import { useFormik, FormikProvider } from "formik";
 import { db } from "../../api/firebase";
 import { doc, setDoc } from "firebase/firestore";
-import { Picker } from "@react-native-picker/picker";
+import { DatePicker } from "../../utilidades/datePicker";
 
 export const FormularioEmpleado = (props) => {
   const { empleados, setEmpleados, empleado, setEmpleado, setIndex } = props;
   const [validateRutEmpleado, setValidateRutEmpleado] = useState(false);
   const [isValid, setIsValid] = useState(true);
   const [isPressed, setIsPressed] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState();
+  const [selectedDay, setSelectedDay] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
 
   const validar = () => {
     setIndex(3);
     /*setIsPressed(true);
     setIsValid(validarEntradas());
-    if (isValid && !validateRutRazon && !validateRutRepresentante) {
+    if (isValid && !validateRutEmpleado) {
       almacenarDatosBD();
       setIndex(3);
     }*/
   };
 
   const almacenarDatosBD = async () => {
-    await setDoc(doc(db, "Empleados", getFieldProps("rut").value), values);
+    let data = {
+      ...values,
+      fechaNacimiento: selectedDay + "-" + selectedMonth + "-" + selectedYear,
+    };
+    await setDoc(doc(db, "Empleados", getFieldProps("rut").value), data);
   };
 
   const validarEntradas = () => {
@@ -123,17 +123,6 @@ export const FormularioEmpleado = (props) => {
             inputContainerStyle={styles.inputContainer}
             style={styles.input}
             placeholderTextColor="gray"
-            placeholder="Fecha de Nacimiento"
-            onChangeText={handleChange("fechaNacimiento")}
-            onBlur={handleBlur("fechaNacimiento")}
-            value={values.fechaNacimiento}
-          />
-
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
             placeholder="Profesión u Oficio"
             onChangeText={handleChange("profesionOficio")}
             onBlur={handleBlur("profesionOficio")}
@@ -161,15 +150,18 @@ export const FormularioEmpleado = (props) => {
             onBlur={handleBlur("direccion")}
             value={values.direccion}
           />
-          <Picker
-            selectedValue={selectedLanguage}
-            onValueChange={(itemValue, itemIndex) =>
-              setSelectedLanguage(itemValue)
-            }
-          >
-            <Picker.Item label="Java" value="java" />
-            <Picker.Item label="JavaScript" value="js" />
-          </Picker>
+
+          <DatePicker
+            title="Fecha de Nacimiento"
+            selectedDay={selectedDay}
+            setSelectedDay={setSelectedDay}
+            selectedMonth={selectedMonth}
+            setSelectedMonth={setSelectedMonth}
+            selectedYear={selectedYear}
+            setSelectedYear={setSelectedYear}
+            since={1960}
+            to={2007}
+          />
         </ScrollView>
         <View style={styles.bottomContainer}>
           <View style={styles.item}>

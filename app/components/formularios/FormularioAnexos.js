@@ -6,10 +6,13 @@ import { db } from "../../api/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { DatePicker } from "../../utilidades/datePicker";
 import { Picker } from "@react-native-picker/picker";
+import { FormularioAutocompleteAnexos } from "./FormularioAutocompleteAnexos";
+import { useNavigation } from "@react-navigation/native";
 
 export const FormularioAnexos = (props) => {
-  const { anexos, setAnexos } = props;
+  const { isEnabled, anexos, anexo, setAnexo } = props;
   //validar horas y sueldo
+  const navigation = useNavigation();
   const [isValid, setIsValid] = useState(true);
   const [isPressed, setIsPressed] = useState(false);
   const [selectedDay, setSelectedDay] = useState("1");
@@ -23,12 +26,13 @@ export const FormularioAnexos = (props) => {
   const validar = () => {
     //almacenarDatosBD();
     // enviar a edicion
-    /*setIsPressed(true);
+    setIsPressed(true);
     setIsValid(validarEntradas());
-    if (isValid) {
+    if (validarEntradas()) {
       almacenarDatosBD();
-      setIndex(3);
-    }*/
+      navigation.navigate("EdicionContrato");
+      console.log("generando contrato");
+    }
   };
 
   const almacenarDatosBD = async () => {
@@ -56,11 +60,7 @@ export const FormularioAnexos = (props) => {
 
   const validarEntradas = () => {
     if (
-      getFieldProps("fechaActual").value !== "" &&
-      getFieldProps("fechaInicioFaenas").value !== "" &&
       getFieldProps("beneficios").value !== "" &&
-      getFieldProps("regimenPension").value !== "" &&
-      getFieldProps("regimenSalud").value !== "" &&
       getFieldProps("cantidadEjemplares").value !== ""
     ) {
       return true;
@@ -79,98 +79,122 @@ export const FormularioAnexos = (props) => {
     },
   });
 
-  const { handleChange, handleBlur, getFieldProps, setFieldValue, values } =
-    formik;
+  const { handleBlur, getFieldProps, setValues, values } = formik;
+
+  const actualizarEstado = (e, key) => {
+    setValues({ ...values, [key]: e });
+    setAnexo({ ...anexo, [key]: e });
+  };
 
   return (
     <FormikProvider value={formik}>
       <>
-        <ScrollView style={styles.scrollView}>
-          <View style={{ marginBottom: 20 }}>
-            <DatePicker
-              title="Fecha de Inicio de Faenas"
-              selectedDay={selectedDay}
-              setSelectedDay={setSelectedDay}
-              selectedMonth={selectedMonth}
-              setSelectedMonth={setSelectedMonth}
-              selectedYear={selectedYear}
-              setSelectedYear={setSelectedYear}
-              since={new Date().getFullYear()}
-              to={new Date().getFullYear() + 1}
-            />
-          </View>
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Beneficios"
-            onChangeText={handleChange("beneficios")}
-            onBlur={handleBlur("beneficios")}
-            value={values.beneficios}
-          />
-          <View style={styles.picker}>
-            <Picker
-              selectedValue={selectedPension}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedPension(itemValue)
-              }
-              mode="dropdown"
-            >
-              <Picker.Item label="Regimen Antiguo" value={"Regimen Antiguo"} />
-              <Picker.Item
-                label="Regimen Nuevo A.F.P"
-                value={"Regimen Nuevo A.F.P"}
+        {!isEnabled ? (
+          <ScrollView style={styles.scrollView}>
+            <View style={{ marginBottom: 20 }}>
+              <DatePicker
+                title="Fecha de Inicio de Faenas"
+                selectedDay={selectedDay}
+                setSelectedDay={setSelectedDay}
+                selectedMonth={selectedMonth}
+                setSelectedMonth={setSelectedMonth}
+                selectedYear={selectedYear}
+                setSelectedYear={setSelectedYear}
+                since={new Date().getFullYear()}
+                to={new Date().getFullYear() + 1}
+                width="90%"
               />
-            </Picker>
-          </View>
-          <View style={styles.picker}>
-            <Picker
-              selectedValue={selectedSalud}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedSalud(itemValue)
-              }
-              mode="dropdown"
-            >
-              <Picker.Item label="Fonasa" value={"Fonasa"} />
-              <Picker.Item label="Isapre" value={"Isapre"} />
-            </Picker>
-          </View>
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Cantidad de ejemplares"
-            onChangeText={handleChange("cantidadEjemplares")}
-            onBlur={handleBlur("cantidadEjemplares")}
-            value={values.cantidadEjemplares}
-          />
-        </ScrollView>
-        <View style={styles.bottomContainer}>
-          <View style={styles.item}>
-            {
-              //isPressed && !isValid && (
-              //<Text style={{ color: "red" }}>Faltan campos por completar</Text>)
-            }
-          </View>
-          <View style={styles.item2}>
-            <Button
-              onPress={() => validar()}
-              buttonStyle={styles.boton}
-              icon={
-                <Icon
-                  type="material-community"
-                  name="arrow-right"
-                  size={16}
-                  color="white"
-                />
-              }
-              iconRight
-              titleStyle={{ fontSize: 14 }}
-              title="Siguiente"
+            </View>
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Beneficios"
+              onChangeText={(e) => actualizarEstado(e, "beneficios")}
+              onBlur={handleBlur("beneficios")}
+              value={values.beneficios}
             />
-          </View>
+            <View style={styles.picker}>
+              <Picker
+                selectedValue={selectedPension}
+                onValueChange={(itemValue, itemIndex) =>
+                  setSelectedPension(itemValue)
+                }
+                mode="dropdown"
+              >
+                <Picker.Item
+                  label="Regimen Antiguo"
+                  value={"Regimen Antiguo"}
+                />
+                <Picker.Item
+                  label="Regimen Nuevo A.F.P"
+                  value={"Regimen Nuevo A.F.P"}
+                />
+              </Picker>
+            </View>
+            <View style={styles.picker}>
+              <Picker
+                selectedValue={selectedSalud}
+                onValueChange={(itemValue, itemIndex) =>
+                  setSelectedSalud(itemValue)
+                }
+                mode="dropdown"
+              >
+                <Picker.Item label="Fonasa" value={"Fonasa"} />
+                <Picker.Item label="Isapre" value={"Isapre"} />
+              </Picker>
+            </View>
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Cantidad de ejemplares"
+              onChangeText={(e) => actualizarEstado(e, "cantidadEjemplares")}
+              onBlur={handleBlur("cantidadEjemplares")}
+              value={values.cantidadEjemplares}
+            />
+          </ScrollView>
+        ) : (
+          <FormularioAutocompleteAnexos
+            anexos={anexos}
+            anexo={anexo}
+            setAnexo={setAnexo}
+            selectedDay={selectedDay}
+            setSelectedDay={setSelectedDay}
+            selectedMonth={selectedMonth}
+            setSelectedMonth={setSelectedMonth}
+            selectedYear={selectedYear}
+            setSelectedYear={setSelectedYear}
+            selectedPension={selectedPension}
+            setSelectedPension={setSelectedPension}
+            selectedSalud={selectedSalud}
+            setSelectedSalud={setSelectedSalud}
+            setValues={setValues}
+            values={values}
+          />
+        )}
+        <View style={styles.item}>
+          {isPressed && !isValid && (
+            <Text style={{ color: "red" }}>Faltan campos por completar</Text>
+          )}
+        </View>
+        <View style={styles.item2}>
+          <Button
+            onPress={() => validar()}
+            buttonStyle={styles.boton}
+            icon={
+              <Icon
+                type="material-community"
+                name="content-save"
+                size={16}
+                color="white"
+              />
+            }
+            titleStyle={{ fontSize: 14 }}
+            title=" Generar Contrato"
+          />
         </View>
       </>
     </FormikProvider>
@@ -200,8 +224,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   boton: {
-    width: 90,
-    height: 36,
     backgroundColor: "#99c781",
     borderColor: "#3f9d2f",
     shadowOffset: { width: -1, height: 3 },
@@ -218,8 +240,6 @@ const styles = StyleSheet.create({
     width: "65%",
   },
   item2: {
-    width: "27%",
-    flexDirection: "row-reverse",
     alignSelf: "center",
     marginTop: 10,
     marginBottom: 10,

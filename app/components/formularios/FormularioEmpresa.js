@@ -1,29 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, ScrollView, Text } from "react-native";
 import { Input, Icon, Button } from "react-native-elements";
 import { validateRut, formatRut } from "@fdograph/rut-utilities";
 import { useFormik, FormikProvider } from "formik";
 import { db } from "../../api/firebase";
 import { doc, setDoc } from "firebase/firestore";
+import { FormularioAutocompleteEmpresa } from "./FormularioAutocompleteEmpresa";
 
 export const FormularioEmpresa = (props) => {
-  const { empresas, setEmpresas, setIndex } = props;
+  const { isEnabled, empresas, setEmpresas, setIndex } = props;
   const [validateRutRazon, setValidateRutRazon] = useState(false);
   const [validateRutRepresentante, setValidateRutRepresentante] =
     useState(false);
   const [isValid, setIsValid] = useState(true);
   const [isPressed, setIsPressed] = useState(false);
+  const [empresa, setEmpresa] = useState({
+    cargoRepresentante: "",
+    ciudad: "",
+    direccion: "",
+    razonSocial: "",
+    representante: "",
+    rutRazonSocial: "",
+    rutRepresentante: "",
+  });
 
   const validar = () => {
-    setIndex(2);
-    /*
     setIsPressed(true);
     setIsValid(validarEntradas());
     if (validarEntradas() && !validateRutRazon && !validateRutRepresentante) {
-      almacenarDatosBD();
+      //almacenarDatosBD();
       setIndex(2);
     }
-    */
   };
 
   const almacenarDatosBD = async () => {
@@ -60,108 +67,130 @@ export const FormularioEmpresa = (props) => {
     },
   });
 
-  const { handleChange, handleBlur, getFieldProps, setFieldValue, values } =
+  const { handleBlur, getFieldProps, setFieldValue, setValues, values } =
     formik;
+
+  const actualizarEstado = (e, key) => {
+    setValues({ ...values, [key]: e });
+    setEmpresa({ ...empresa, [key]: e });
+  };
 
   return (
     <FormikProvider value={formik}>
       <>
-        <ScrollView style={styles.scrollView}>
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Razón Social"
-            onChangeText={handleChange("razonSocial")}
-            onBlur={handleBlur("razonSocial")}
-            value={values.razonSocial}
-          />
+        {!isEnabled && (
+          <ScrollView
+            style={styles.scrollView}
+            keyboardShouldPersistTaps="always"
+          >
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Razón Social"
+              onChangeText={(e) => actualizarEstado(e, "razonSocial")}
+              onBlur={handleBlur("razonSocial")}
+              value={values.razonSocial}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Rut Razón Social"
-            onChangeText={handleChange("rutRazonSocial")}
-            onBlur={() => {
-              setValidateRutRazon(
-                !validateRut(getFieldProps("rutRazonSocial").value)
-              );
-              setFieldValue(
-                "rutRazonSocial",
-                formatRut(getFieldProps("rutRazonSocial").value)
-              );
-            }}
-            errorMessage={validateRutRazon && "Rut no válido"}
-            value={values.rutRazonSocial}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Rut Razón Social"
+              onChangeText={(e) => actualizarEstado(e, "rutRazonSocial")}
+              onBlur={() => {
+                setValidateRutRazon(
+                  !validateRut(getFieldProps("rutRazonSocial").value)
+                );
+                setFieldValue(
+                  "rutRazonSocial",
+                  formatRut(getFieldProps("rutRazonSocial").value)
+                );
+              }}
+              errorMessage={validateRutRazon && "Rut no válido"}
+              value={values.rutRazonSocial}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Ciudad"
-            onChangeText={handleChange("ciudad")}
-            onBlur={handleBlur("ciudad")}
-            value={values.ciudad}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Ciudad"
+              onChangeText={(e) => actualizarEstado(e, "ciudad")}
+              onBlur={handleBlur("ciudad")}
+              value={values.ciudad}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Representante Legal"
-            onChangeText={handleChange("representante")}
-            onBlur={handleBlur("representante")}
-            value={values.representante}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Representante Legal"
+              onChangeText={(e) => actualizarEstado(e, "representante")}
+              onBlur={handleBlur("representante")}
+              value={values.representante}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Rut Representante Legal"
-            onChangeText={handleChange("rutRepresentante")}
-            onBlur={() => {
-              setValidateRutRepresentante(
-                !validateRut(getFieldProps("rutRepresentante").value)
-              );
-              setFieldValue(
-                "rutRepresentante",
-                formatRut(getFieldProps("rutRepresentante").value)
-              );
-            }}
-            errorMessage={validateRutRepresentante && "Rut no válido"}
-            value={values.rutRepresentante}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Rut Representante Legal"
+              onChangeText={(e) => actualizarEstado(e, "rutRepresentante")}
+              onBlur={() => {
+                setValidateRutRepresentante(
+                  !validateRut(getFieldProps("rutRepresentante").value)
+                );
+                setFieldValue(
+                  "rutRepresentante",
+                  formatRut(getFieldProps("rutRepresentante").value)
+                );
+              }}
+              errorMessage={validateRutRepresentante && "Rut no válido"}
+              value={values.rutRepresentante}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Cargo del Representante"
-            onChangeText={handleChange("cargoRepresentante")}
-            onBlur={handleBlur("cargoRepresentante")}
-            value={values.cargoRepresentante}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Cargo del Representante"
+              onChangeText={(e) => actualizarEstado(e, "cargoRepresentante")}
+              onBlur={handleBlur("cargoRepresentante")}
+              value={values.cargoRepresentante}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Dirección Empresa"
-            onChangeText={handleChange("direccion")}
-            onBlur={handleBlur("direccion")}
-            value={values.direccion}
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Dirección Empresa"
+              onChangeText={(e) => actualizarEstado(e, "direccion")}
+              onBlur={handleBlur("direccion")}
+              value={values.direccion}
+            />
+          </ScrollView>
+        )}
+
+        {isEnabled && (
+          <FormularioAutocompleteEmpresa
+            empresas={empresas}
+            empresa={empresa}
+            setEmpresa={setEmpresa}
+            setValues={setValues}
+            values={values}
+            setValidateRutRazon={setValidateRutRazon}
+            setValidateRutRepresentante={setValidateRutRepresentante}
           />
-        </ScrollView>
+        )}
         <View style={styles.bottomContainer}>
           <View style={styles.item}>
             {isPressed && !isValid && (
@@ -224,7 +253,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   bottomContainer: {
+    bottom: 0,
+    position: "absolute",
     flexDirection: "row",
+    backgroundColor: "#f2f2f2",
   },
   item: {
     alignSelf: "center",
@@ -238,4 +270,95 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
   },
+  autocompleteContainer: {
+    top: 40,
+    position: "absolute",
+    zIndex: 10,
+  },
 });
+/*
+<View style={styles.autocompleteContainer}>
+            <Autocomplete
+              data={options.razonSocial}
+              placeholder="razon social"
+              onChangeText={(text) => {
+                setOptions({
+                  ...options,
+                  razonSocial: query("razonSocial").filter((razon) =>
+                    razon.toLowerCase().includes(text.toLowerCase())
+                  ),
+                });
+                setEmpresa({ ...empresa, razonSocial: text });
+              }}
+              onFocus={() =>
+                setHideResults({ ...hideResults, razonSocial: false })
+              }
+              onEndEditing={() =>
+                setHideResults({ ...hideResults, razonSocial: true })
+              }
+              value={empresa.razonSocial}
+              hideResults={hideResults.razonSocial}
+              flatListProps={{
+                keyExtractor: (_, idx) => idx,
+                renderItem: ({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setEmpresa({ ...empresa, razonSocial: item });
+                      setOptions({
+                        ...options,
+                        razonSocial: [],
+                      });
+                      setHideResults({ ...hideResults, razonSocial: true });
+                    }}
+                  >
+                    <Text>{item}</Text>
+                  </TouchableOpacity>
+                ),
+              }}
+            />
+          </View>
+
+
+
+
+
+          <View style={styles.autocompleteContainer}>
+            <Autocomplete
+              data={options.razonSocial}
+              placeholder="razon social"
+              onChangeText={(text) => {
+                setOptions({
+                  ...options,
+                  razonSocial: query("razonSocial").filter((razon) =>
+                    razon.toLowerCase().includes(text.toLowerCase())
+                  ),
+                });
+                setEmpresa({ ...empresa, razonSocial: text });
+              }}
+              onFocus={() =>
+                setHideResults({ ...hideResults, razonSocial: false })
+              }
+              onEndEditing={() =>
+                setHideResults({ ...hideResults, razonSocial: true })
+              }
+              defaultValue={empresa.razonSocial}
+              value={empresa.razonSocial}
+              hideResults={hideResults.razonSocial}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  key={Math.random()}
+                  onPress={() => {
+                    setEmpresa({ ...empresa, razonSocial: item });
+                    setOptions({
+                      ...options,
+                      razonSocial: [],
+                    });
+                    setHideResults({ ...hideResults, razonSocial: true });
+                  }}
+                >
+                  <Text>{item}</Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+*/

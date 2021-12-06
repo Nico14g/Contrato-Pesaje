@@ -6,24 +6,24 @@ import { useFormik, FormikProvider } from "formik";
 import { db } from "../../api/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { DatePicker } from "../../utilidades/datePicker";
+import { FormularioAutocompleteEmpleado } from "./FormularioAutocompleteEmpleado";
 
 export const FormularioEmpleado = (props) => {
-  const { empleados, setEmpleados, empleado, setEmpleado, setIndex } = props;
+  const { isEnabled, empleados, empleado, setEmpleado, setIndex } = props;
   const [validateRutEmpleado, setValidateRutEmpleado] = useState(false);
   const [isValid, setIsValid] = useState(true);
   const [isPressed, setIsPressed] = useState(false);
-  const [selectedDay, setSelectedDay] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedDay, setSelectedDay] = useState("1");
+  const [selectedMonth, setSelectedMonth] = useState("01");
+  const [selectedYear, setSelectedYear] = useState("1960");
 
   const validar = () => {
-    setIndex(3);
-    /*setIsPressed(true);
+    setIsPressed(true);
     setIsValid(validarEntradas());
-    if (isValid && !validateRutEmpleado) {
+    if (validarEntradas() && !validateRutEmpleado) {
       almacenarDatosBD();
       setIndex(3);
-    }*/
+    }
   };
 
   const almacenarDatosBD = async () => {
@@ -31,6 +31,7 @@ export const FormularioEmpleado = (props) => {
       ...values,
       fechaNacimiento: selectedDay + "-" + selectedMonth + "-" + selectedYear,
     };
+
     await setDoc(doc(db, "Empleados", getFieldProps("rut").value), data);
   };
 
@@ -40,7 +41,6 @@ export const FormularioEmpleado = (props) => {
       getFieldProps("rut").value !== "" &&
       getFieldProps("numeroDocumento").value !== "" &&
       getFieldProps("nacionalidad").value !== "" &&
-      getFieldProps("fechaNacimiento").value !== "" &&
       getFieldProps("profesionOficio").value !== "" &&
       getFieldProps("estadoCivil").value !== "" &&
       getFieldProps("direccion").value !== ""
@@ -63,112 +63,136 @@ export const FormularioEmpleado = (props) => {
     },
   });
 
-  const { handleChange, handleBlur, getFieldProps, setFieldValue, values } =
+  const { handleBlur, getFieldProps, setFieldValue, setValues, values } =
     formik;
+
+  const actualizarEstado = (e, key) => {
+    setValues({ ...values, [key]: e });
+    setEmpleado({ ...empleado, [key]: e });
+  };
 
   return (
     <FormikProvider value={formik}>
       <>
-        <ScrollView style={styles.scrollView}>
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Nombre Empleado"
-            onChangeText={handleChange("nombreEmpleado")}
-            onBlur={handleBlur("nombreEmpleado")}
-            value={values.nombreEmpleado}
-          />
+        {!isEnabled ? (
+          <ScrollView style={styles.scrollView}>
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Nombre Empleado"
+              onChangeText={(e) => actualizarEstado(e, "nombreEmpleado")}
+              onBlur={handleBlur("nombreEmpleado")}
+              value={values.nombreEmpleado}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Rut"
-            onChangeText={handleChange("rut")}
-            onBlur={() => {
-              setValidateRutEmpleado(!validateRut(getFieldProps("rut").value));
-              setFieldValue("rut", formatRut(getFieldProps("rut").value));
-            }}
-            errorMessage={validateRutEmpleado && "Rut no válido"}
-            value={values.rut}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Rut"
+              onChangeText={(e) => actualizarEstado(e, "rut")}
+              onBlur={() => {
+                setValidateRutEmpleado(
+                  !validateRut(getFieldProps("rut").value)
+                );
+                setFieldValue("rut", formatRut(getFieldProps("rut").value));
+              }}
+              errorMessage={validateRutEmpleado && "Rut no válido"}
+              value={values.rut}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Número de documento"
-            onChangeText={handleChange("numeroDocumento")}
-            onBlur={handleBlur("numeroDocumento")}
-            value={values.numeroDocumento}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Número de documento"
+              onChangeText={(e) => actualizarEstado(e, "numeroDocumento")}
+              onBlur={handleBlur("numeroDocumento")}
+              value={values.numeroDocumento}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Nacionalidad"
-            onChangeText={handleChange("nacionalidad")}
-            onBlur={handleBlur("nacionalidad")}
-            value={values.nacionalidad}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Nacionalidad"
+              onChangeText={(e) => actualizarEstado(e, "nacionalidad")}
+              onBlur={handleBlur("nacionalidad")}
+              value={values.nacionalidad}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Profesión u Oficio"
-            onChangeText={handleChange("profesionOficio")}
-            onBlur={handleBlur("profesionOficio")}
-            value={values.profesionOficio}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Profesión u Oficio"
+              onChangeText={(e) => actualizarEstado(e, "profesionOficio")}
+              onBlur={handleBlur("profesionOficio")}
+              value={values.profesionOficio}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Estado Civil"
-            onChangeText={handleChange("estadoCivil")}
-            onBlur={handleBlur("estadoCivil")}
-            value={values.estadoCivil}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Estado Civil"
+              onChangeText={(e) => actualizarEstado(e, "estadoCivil")}
+              onBlur={handleBlur("estadoCivil")}
+              value={values.estadoCivil}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Dirección"
-            onChangeText={handleChange("direccion")}
-            onBlur={handleBlur("direccion")}
-            value={values.direccion}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Dirección"
+              onChangeText={(e) => actualizarEstado(e, "direccion")}
+              onBlur={handleBlur("direccion")}
+              value={values.direccion}
+            />
 
-          <DatePicker
-            title="Fecha de Nacimiento"
+            <DatePicker
+              title="Fecha de Nacimiento"
+              selectedDay={selectedDay}
+              setSelectedDay={setSelectedDay}
+              selectedMonth={selectedMonth}
+              setSelectedMonth={setSelectedMonth}
+              selectedYear={selectedYear}
+              setSelectedYear={setSelectedYear}
+              since={1960}
+              to={2007}
+              width="90%"
+            />
+          </ScrollView>
+        ) : (
+          <FormularioAutocompleteEmpleado
+            empleados={empleados}
+            empleado={empleado}
+            setEmpleado={setEmpleado}
             selectedDay={selectedDay}
             setSelectedDay={setSelectedDay}
             selectedMonth={selectedMonth}
             setSelectedMonth={setSelectedMonth}
             selectedYear={selectedYear}
             setSelectedYear={setSelectedYear}
-            since={1960}
-            to={2007}
+            setValues={setValues}
+            values={values}
+            setValidateRutEmpleado={setValidateRutEmpleado}
           />
-        </ScrollView>
+        )}
         <View style={styles.bottomContainer}>
           <View style={styles.item}>
-            {
-              //isPressed && !isValid && (
-              //<Text style={{ color: "red" }}>Faltan campos por completar</Text>)
-            }
+            {isPressed && !isValid && (
+              <Text style={{ color: "red" }}>Faltan campos por completar</Text>
+            )}
           </View>
           <View style={styles.item2}>
             <Button
@@ -226,7 +250,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   bottomContainer: {
+    bottom: 0,
+    position: "absolute",
     flexDirection: "row",
+    backgroundColor: "#f2f2f2",
   },
   item: {
     alignSelf: "center",

@@ -13,13 +13,14 @@ export const DatePicker = (props) => {
     setSelectedYear,
     since,
     to,
+    width,
   } = props;
   return (
     <>
       <View>
         <Text style={styles.title}>{title}</Text>
       </View>
-      <View style={styles.viewContainer2}>
+      <View style={{ ...styles.viewContainer2, width: width }}>
         <View
           style={{
             backgroundColor: "white",
@@ -35,7 +36,7 @@ export const DatePicker = (props) => {
           <Text style={styles.texto}>Año</Text>
         </View>
       </View>
-      <View style={styles.viewContainer}>
+      <View style={{ ...styles.viewContainer, width: width }}>
         <View style={styles.colA}>
           <DayPicker
             selectedDay={selectedDay}
@@ -157,13 +158,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     alignSelf: "center",
-    maxWidth: "90%",
+    marginLeft: "3%",
   },
   viewContainer2: {
     flexDirection: "row",
     alignItems: "flex-start",
     alignSelf: "center",
-    maxWidth: "90%",
+    marginLeft: "3%",
   },
   colA: {
     borderRadius: 7,

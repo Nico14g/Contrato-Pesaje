@@ -9,6 +9,17 @@ export default function Servicio(props) {
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const [servicios, setServicios] = useState("");
+
+  const [servicio, setServicio] = useState({
+    nombreServicio: "",
+    ubicacion: "",
+    faenas: "",
+    temporada: "",
+    horasJornada: "",
+    distribucionHoras: "",
+    sueldo: "",
+    labor: "",
+  });
   const componentMounted = useRef(true);
 
   useEffect(() => {
@@ -36,8 +47,10 @@ export default function Servicio(props) {
         title="Datos Servicio"
       />
       <FormularioServicio
+        isEnabled={isEnabled}
         servicios={servicios}
-        setServicios={setServicios}
+        servicio={servicio}
+        setServicio={setServicio}
         setIndex={setIndex}
       />
     </>

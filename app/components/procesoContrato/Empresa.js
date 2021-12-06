@@ -9,14 +9,20 @@ export default function Empresa(props) {
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const [empresas, setEmpresas] = useState([]);
+  const [idEmpresas, setIdEmpresas] = useState([]);
   const componentMounted = useRef(true);
 
   useEffect(() => {
     if (componentMounted.current) {
       let data = [];
+      let id = [];
       getDocs(collection(db, "Empresa")).then((documentos) => {
-        documentos.docs.forEach((doc) => data.push(doc.data()));
+        documentos.docs.forEach((doc) => {
+          data.push(doc.data());
+          id.push(doc.id);
+        });
         setEmpresas(data);
+        setIdEmpresas(id);
       });
     }
     return () => {
@@ -27,16 +33,9 @@ export default function Empresa(props) {
   const consulta = async () => {
     try {
       let data = [];
-
       getDocs(collection(db, "Empresa")).then((documentos) => {
         documentos.docs.forEach((doc) => data.push(doc.data()));
         setEmpresas(data);
-      });
-
-      const querySnapshot = await getDocs(collection(db, "cities"));
-      querySnapshot.forEach((doc) => {
-        data.push(doc.data());
-        setEmpresas([...data]);
       });
     } catch (e) {
       console.log(e);
@@ -57,6 +56,7 @@ export default function Empresa(props) {
         title="Datos Empresa"
       />
       <FormularioEmpresa
+        isEnabled={isEnabled}
         empresas={empresas}
         setEmpresas={setEmpresas}
         setIndex={setIndex}

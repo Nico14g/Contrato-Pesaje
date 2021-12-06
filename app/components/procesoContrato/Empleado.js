@@ -5,10 +5,20 @@ import { db } from "../../api/firebase";
 import { collection, getDocs } from "firebase/firestore";
 
 export default function Empleado(props) {
-  const { empleado, setEmpleado, setIndex } = props;
+  const { setIndex } = props;
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const [empleados, setEmpleados] = useState("");
+  const [empleado, setEmpleado] = useState({
+    nombreEmpleado: "",
+    numeroDocumento: "",
+    direccion: "",
+    nacionalidad: "",
+    fechaNacimiento: "",
+    rut: "",
+    profesionOficio: "",
+    estadoCivil: "",
+  });
   const componentMounted = useRef(true);
 
   useEffect(() => {
@@ -36,6 +46,7 @@ export default function Empleado(props) {
         title="Datos Empleado"
       />
       <FormularioEmpleado
+        isEnabled={isEnabled}
         empleados={empleados}
         setEmpleados={setEmpleados}
         empleado={empleado}

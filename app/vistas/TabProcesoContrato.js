@@ -26,30 +26,6 @@ export default function TabProcesoContrato() {
     { key: "anexos", title: "Otros" },
   ]);
 
-  const PrimeraRuta = () => (
-    <Plantilla
-      setIndex={setIndex}
-      plantillaSelect={plantillaSelect}
-      setPlantillaSelect={setPlantillaSelect}
-    />
-  );
-
-  const SegundaRuta = () => <Empresa setIndex={setIndex} />;
-
-  const TerceraRuta = () => <Empleado setIndex={setIndex} />;
-
-  const CuartaRuta = () => <Servicio setIndex={setIndex} />;
-
-  const QuintaRuta = () => <Anexos />;
-
-  /*const renderScene = SceneMap({
-    plantilla: PrimeraRuta,
-    empresa: SegundaRuta,
-    empleado: TerceraRuta,
-    servicio: CuartaRuta,
-    anexos: QuintaRuta,
-  });
-  */
   const renderScene = ({ route }) => {
     switch (route.key) {
       case "plantilla":
@@ -76,6 +52,11 @@ export default function TabProcesoContrato() {
   const renderTabBar = (props) => {
     const inputRange = props.navigationState.routes.map((x, i) => i);
 
+    const changeView = (i) => {
+      if (index > i) {
+        setIndex(i);
+      }
+    };
     return (
       <View style={styles.tabBar}>
         {props.navigationState.routes.map((route, i) => {
@@ -90,7 +71,7 @@ export default function TabProcesoContrato() {
             <TouchableOpacity
               key={i}
               style={styles.tabItem}
-              onPress={() => console.log("a")}
+              onPress={() => changeView(i)}
             >
               <Animated.Text style={{ opacity, color: "white" }}>
                 {route.title}
@@ -121,7 +102,7 @@ const styles = StyleSheet.create({
   tabBar: {
     alignItems: "center",
     backgroundColor: "#1565c0",
-    height: "10%",
+    height: "8%",
     flexDirection: "row",
   },
   tabItem: {

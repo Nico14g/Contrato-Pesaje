@@ -9,6 +9,14 @@ export default function Anexos() {
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const [anexos, setAnexos] = useState("");
   const componentMounted = useRef(true);
+  const [anexo, setAnexo] = useState({
+    fechaActual: "",
+    fechaInicioFaenas: "",
+    beneficios: "",
+    regimenPension: "",
+    regimenSalud: "",
+    cantidadEjemplares: "",
+  });
 
   useEffect(() => {
     if (componentMounted.current) {
@@ -34,7 +42,12 @@ export default function Anexos() {
         toggleSwitch={toggleSwitch}
         title="Otros Datos"
       />
-      <FormularioAnexos anexos={anexos} setAnexos={setAnexos} />
+      <FormularioAnexos
+        isEnabled={isEnabled}
+        anexos={anexos}
+        anexo={anexo}
+        setAnexo={setAnexo}
+      />
     </>
   );
 }

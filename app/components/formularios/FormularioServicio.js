@@ -4,22 +4,21 @@ import { Input, Icon, Button } from "react-native-elements";
 import { useFormik, FormikProvider } from "formik";
 import { db } from "../../api/firebase";
 import { collection, addDoc } from "firebase/firestore";
+import { FormularioAutocompleteServicio } from "./FormularioAutocompleteServicio";
 
 export const FormularioServicio = (props) => {
-  const { servicios, setServicios, setIndex } = props;
+  const { isEnabled, servicios, servicio, setServicio, setIndex } = props;
   //validar horas y sueldo
   const [isValid, setIsValid] = useState(true);
   const [isPressed, setIsPressed] = useState(false);
 
   const validar = () => {
-    setIndex(4);
-    //almacenarDatosBD();
-    /*setIsPressed(true);
+    setIsPressed(true);
     setIsValid(validarEntradas());
-    if (isValid) {
+    if (validarEntradas()) {
       almacenarDatosBD();
-      setIndex(3);
-    }*/
+      setIndex(4);
+    }
   };
 
   const almacenarDatosBD = async () => {
@@ -55,107 +54,120 @@ export const FormularioServicio = (props) => {
     },
   });
 
-  const { handleChange, handleBlur, getFieldProps, setFieldValue, values } =
-    formik;
+  const { handleBlur, getFieldProps, setValues, values } = formik;
 
+  const actualizarEstado = (e, key) => {
+    setValues({ ...values, [key]: e });
+    setServicio({ ...servicio, [key]: e });
+  };
   return (
     <FormikProvider value={formik}>
       <>
-        <ScrollView style={styles.scrollView}>
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Nombre Servicio"
-            onChangeText={handleChange("nombreServicio")}
-            onBlur={handleBlur("nombreServicio")}
-            value={values.nombreServicio}
-          />
+        {!isEnabled ? (
+          <ScrollView style={styles.scrollView}>
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Nombre Servicio"
+              onChangeText={(e) => actualizarEstado(e, "nombreServicio")}
+              onBlur={handleBlur("nombreServicio")}
+              value={values.nombreServicio}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Ubicación"
-            onChangeText={handleChange("ubicacion")}
-            onBlur={handleBlur("ubicacion")}
-            value={values.ubicacion}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Ubicación"
+              onChangeText={(e) => actualizarEstado(e, "ubicacion")}
+              onBlur={handleBlur("ubicacion")}
+              value={values.ubicacion}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Faenas"
-            onChangeText={handleChange("faenas")}
-            onBlur={handleBlur("faenas")}
-            value={values.faenas}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Faenas"
+              onChangeText={(e) => actualizarEstado(e, "faenas")}
+              onBlur={handleBlur("faenas")}
+              value={values.faenas}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Temporada"
-            onChangeText={handleChange("temporada")}
-            onBlur={handleBlur("temporada")}
-            value={values.temporada}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Temporada"
+              onChangeText={(e) => actualizarEstado(e, "temporada")}
+              onBlur={handleBlur("temporada")}
+              value={values.temporada}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Horas por Jornada"
-            onChangeText={handleChange("horasJornada")}
-            onBlur={handleBlur("horasJornada")}
-            value={values.horasJornada}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Horas por Jornada"
+              onChangeText={(e) => actualizarEstado(e, "horasJornada")}
+              onBlur={handleBlur("horasJornada")}
+              value={values.horasJornada}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Distribución de Horas"
-            onChangeText={handleChange("distribucionHoras")}
-            onBlur={handleBlur("distribucionHoras")}
-            value={values.distribucionHoras}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Distribución de Horas"
+              onChangeText={(e) => actualizarEstado(e, "distribucionHoras")}
+              onBlur={handleBlur("distribucionHoras")}
+              value={values.distribucionHoras}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Sueldo"
-            onChangeText={handleChange("sueldo")}
-            onBlur={handleBlur("sueldo")}
-            value={values.sueldo}
-          />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Sueldo"
+              onChangeText={(e) => actualizarEstado(e, "sueldo")}
+              onBlur={handleBlur("sueldo")}
+              value={values.sueldo}
+            />
 
-          <Input
-            containerStyle={styles.container}
-            inputContainerStyle={styles.inputContainer}
-            style={styles.input}
-            placeholderTextColor="gray"
-            placeholder="Labor"
-            onChangeText={handleChange("labor")}
-            onBlur={handleBlur("labor")}
-            value={values.labor}
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Labor"
+              onChangeText={(e) => actualizarEstado(e, "labor")}
+              onBlur={handleBlur("labor")}
+              value={values.labor}
+            />
+          </ScrollView>
+        ) : (
+          <FormularioAutocompleteServicio
+            servicios={servicios}
+            servicio={servicio}
+            setServicio={setServicio}
+            setValues={setValues}
+            values={values}
           />
-        </ScrollView>
+        )}
+
         <View style={styles.bottomContainer}>
           <View style={styles.item}>
-            {
-              //isPressed && !isValid && (
-              //<Text style={{ color: "red" }}>Faltan campos por completar</Text>)
-            }
+            {isPressed && !isValid && (
+              <Text style={{ color: "red" }}>Faltan campos por completar</Text>
+            )}
           </View>
           <View style={styles.item2}>
             <Button

@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, Platform } from "react-native";
 import { Icon, SearchBar, Button } from "react-native-elements";
 import { ListaPlantillas } from "../seleccionPlantilla/ListaPlantillas";
 import * as DocumentPicker from "expo-document-picker";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { storeData, readData } from "../../utilidades/variablesGlobales";
 
 export default function Plantilla(props) {
   const { setIndex, plantillaSelect, setPlantillaSelect } = props;
@@ -14,35 +14,19 @@ export default function Plantilla(props) {
 
   useEffect(() => {
     if (componentMounted.current) {
-      readData();
+      Promise.resolve(readData(STORAGE_KEY)).then((data) =>
+        data === null ? null : setPlantillas(data)
+      );
     }
     return () => {
       componentMounted.current = false;
     };
   }, []);
 
-  const readData = async () => {
-    try {
-      //const auxPlantillas = await AsyncStorage.getItem(STORAGE_KEY);
-      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-      jsonValue !== null ? setPlantillas(JSON.parse(jsonValue)) : null;
-    } catch (e) {
-      alert("Se ha producido un fallo al recuperar las plantillas");
-    }
-  };
-
-  const storeData = async (value) => {
-    try {
-      const jsonValue = JSON.stringify(value);
-      let a = await AsyncStorage.setItem(STORAGE_KEY, jsonValue);
-    } catch (e) {
-      // saving error
-    }
-  };
-
   let documentPicker = async () => {
     try {
       let archivo = await DocumentPicker.getDocumentAsync({
+        copyToCacheDirectory: true,
         type: [
           "application/msword",
           "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -50,7 +34,7 @@ export default function Plantilla(props) {
       });
 
       if (archivo.type === "cancel") {
-        alert("Se requiero permiso para acceder al documento");
+        alert("Se ha cancelado la acción");
         return;
       }
 
@@ -65,9 +49,10 @@ export default function Plantilla(props) {
       }
 
       setPlantillas((plantillas) => [...plantillas, archivo]);
-      storeData([...plantillas, archivo]);
-
-      readData.apply();
+      storeData([...plantillas, archivo], STORAGE_KEY);
+      Promise.resolve(readData(STORAGE_KEY)).then((data) =>
+        data === null ? null : setPlantillas(data)
+      );
     } catch (e) {
       console.log(e);
     }

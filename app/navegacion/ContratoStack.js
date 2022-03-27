@@ -1,6 +1,5 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Icon } from "react-native-elements";
 import Contratos from "../vistas/Contratos";
 import TabProcesoContrato from "../vistas/TabProcesoContrato";
 import EdicionContrato from "../vistas/EdicionContrato";
@@ -42,7 +41,8 @@ export default function ContratoStack() {
         component={EdicionContrato}
         options={{
           title: "Editor Contrato",
-          headerBackVisible: true,
+          headerBackVisible: false,
+          headerShown: false,
         }}
       />
     </Stack.Navigator>

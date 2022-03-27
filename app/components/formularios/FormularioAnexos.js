@@ -8,6 +8,7 @@ import { DatePicker } from "../../utilidades/datePicker";
 import { Picker } from "@react-native-picker/picker";
 import { FormularioAutocompleteAnexos } from "./FormularioAutocompleteAnexos";
 import { useNavigation } from "@react-navigation/native";
+import { storeData } from "../../utilidades/variablesGlobales";
 
 export const FormularioAnexos = (props) => {
   const { isEnabled, anexos, anexo, setAnexo } = props;
@@ -24,12 +25,12 @@ export const FormularioAnexos = (props) => {
   const [selectedSalud, setSelectedSalud] = useState("Regimen de Salud");
 
   const validar = () => {
-    //almacenarDatosBD();
     // enviar a edicion
     setIsPressed(true);
     setIsValid(validarEntradas());
     if (validarEntradas()) {
       almacenarDatosBD();
+
       navigation.navigate("EdicionContrato");
       console.log("generando contrato");
     }
@@ -54,8 +55,8 @@ export const FormularioAnexos = (props) => {
       regimenPension: selectedPension,
       regimenSalud: selectedSalud,
     };
-
-    const docRef = await addDoc(collection(db, "Anexos"), data);
+    storeData(data, "@datosAnexos");
+    //const docRef = await addDoc(collection(db, "Anexos"), data);
   };
 
   const validarEntradas = () => {

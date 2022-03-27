@@ -18,6 +18,7 @@ export default function Empresa(props) {
       let id = [];
       getDocs(collection(db, "Empresa")).then((documentos) => {
         documentos.docs.forEach((doc) => {
+          console.log(doc.data());
           data.push(doc.data());
           id.push(doc.id);
         });

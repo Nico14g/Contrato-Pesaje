@@ -5,6 +5,7 @@ import { useFormik, FormikProvider } from "formik";
 import { db } from "../../api/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { FormularioAutocompleteServicio } from "./FormularioAutocompleteServicio";
+import { storeData } from "../../utilidades/variablesGlobales";
 
 export const FormularioServicio = (props) => {
   const { isEnabled, servicios, servicio, setServicio, setIndex } = props;
@@ -12,11 +13,12 @@ export const FormularioServicio = (props) => {
   const [isValid, setIsValid] = useState(true);
   const [isPressed, setIsPressed] = useState(false);
 
-  const validar = () => {
+  const validar = async () => {
     setIsPressed(true);
     setIsValid(validarEntradas());
     if (validarEntradas()) {
-      almacenarDatosBD();
+      await storeData(values, "@datosServicio");
+      //almacenarDatosBD();
       setIndex(4);
     }
   };

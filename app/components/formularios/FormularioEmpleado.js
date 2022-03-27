@@ -7,6 +7,7 @@ import { db } from "../../api/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { DatePicker } from "../../utilidades/datePicker";
 import { FormularioAutocompleteEmpleado } from "./FormularioAutocompleteEmpleado";
+import { storeData } from "../../utilidades/variablesGlobales";
 
 export const FormularioEmpleado = (props) => {
   const { isEnabled, empleados, empleado, setEmpleado, setIndex } = props;
@@ -31,8 +32,8 @@ export const FormularioEmpleado = (props) => {
       ...values,
       fechaNacimiento: selectedDay + "-" + selectedMonth + "-" + selectedYear,
     };
-
-    await setDoc(doc(db, "Empleados", getFieldProps("rut").value), data);
+    storeData(data, "@datosEmpleado");
+    //await setDoc(doc(db, "Empleados", getFieldProps("rut").value), data);
   };
 
   const validarEntradas = () => {

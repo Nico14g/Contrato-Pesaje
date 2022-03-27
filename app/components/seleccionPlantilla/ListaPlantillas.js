@@ -12,6 +12,7 @@ import { Card, Icon } from "react-native-elements";
 import { size } from "lodash";
 import Word from "../../../assets/imagenes/word.png";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { storeData } from "../../utilidades/variablesGlobales";
 
 export const ListaPlantillas = (props) => {
   const { plantillas, setIndex, plantillaSelect, setPlantillaSelect } = props;
@@ -39,16 +40,16 @@ export const ListaPlantillas = (props) => {
   );
 };
 
-//<Text>{plantilla.item}</Text>
-//<Text> {plantilla.index} </Text>
-
 function Plantilla(props) {
   const { plantilla, setIndex, setPlantillaSelect } = props;
+  const STORAGE_KEY = "@plantillaSelect";
 
-  const seleccionarPlantilla = () => {
+  const seleccionarPlantilla = async () => {
+    storeData(plantilla, STORAGE_KEY);
     setPlantillaSelect(plantilla);
     setIndex(1);
   };
+
   return (
     <TouchableOpacity onPress={() => seleccionarPlantilla()}>
       <Card>

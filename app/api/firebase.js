@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, CACHE_SIZE_UNLIMITED } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAHokW9uQo6JUTACyeN7YlDH-UWrTRR58Q",
@@ -8,7 +9,9 @@ const firebaseConfig = {
   storageBucket: "contrato-pesaje.appspot.com",
   messagingSenderId: "889331894546",
   appId: "1:889331894546:web:047f6e7facaf9eeab04bcb",
+  cacheSizeBytes: CACHE_SIZE_UNLIMITED,
 };
 
 export const firebase = initializeApp(firebaseConfig);
 export const db = getFirestore();
+export const storage = getStorage();

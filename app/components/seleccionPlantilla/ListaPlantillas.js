@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
   StyleSheet,
@@ -16,6 +16,20 @@ import { storeData } from "../../utilidades/variablesGlobales";
 
 export const ListaPlantillas = (props) => {
   const { plantillas, setIndex, plantillaSelect, setPlantillaSelect } = props;
+  const [cargado, setCargado] = useState(false);
+  const componentMounted = useRef(true);
+
+  useEffect(() => {
+    if (componentMounted.current) {
+      setTimeout(() => {
+        setCargado(true);
+      }, 2000);
+    }
+    return () => {
+      componentMounted.current = false;
+    };
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       {size(plantillas) > 0 ? (
@@ -30,10 +44,19 @@ export const ListaPlantillas = (props) => {
           )}
           keyExtractor={(item, index) => index.toString()}
         />
+      ) : cargado ? (
+        <View style={styles.loaderPlantilla}>
+          <Text style={styles.texto}>No se han encontrado plantillas</Text>
+          <Icon
+            name="text-box-remove-outline"
+            type="material-community"
+            size={50}
+          />
+        </View>
       ) : (
         <View style={styles.loaderPlantilla}>
           <ActivityIndicator color="blue" size="large" />
-          <Text>Cargando plantillas</Text>
+          <Text>Cargando contratos</Text>
         </View>
       )}
     </SafeAreaView>
@@ -95,5 +118,9 @@ const styles = StyleSheet.create({
   loaderPlantilla: { marginTop: 10, marginBottom: 10, alignItems: "center" },
   nombreText: {
     fontWeight: "bold",
+  },
+  texto: {
+    fontSize: 18,
+    marginBottom: 20,
   },
 });

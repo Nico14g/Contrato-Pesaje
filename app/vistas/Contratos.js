@@ -1,12 +1,42 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Text, Button, Icon, SearchBar } from "react-native-elements";
 import ListaContratos from "../components/contrato/ListaContratos";
+import { readData } from "../utilidades/variablesGlobales";
 
 export default function Contratos() {
   const navigation = useNavigation();
   const [search, setSearch] = useState("");
+  const [contratosCreados, setContratosCreados] = useState([]);
+  const componentMounted = useRef(true);
+  const [cargado, setCargado] = useState(false);
+  const STORAGE_KEY = "@contratosCreados";
+
+  useEffect(async () => {
+    setCargado(false);
+    if (componentMounted.current) {
+      setTimeout(() => {
+        Promise.resolve(readData(STORAGE_KEY)).then((data) =>
+          data === null ? null : setContratosCreados(data)
+        );
+      }, 1000);
+      setCargado(true);
+    }
+    return () => {
+      componentMounted.current = false;
+    };
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setTimeout(() => {
+        Promise.resolve(readData(STORAGE_KEY)).then((data) =>
+          data === null ? null : setContratosCreados(data)
+        );
+      }, 1000);
+    }, [])
+  );
 
   return (
     <>
@@ -42,7 +72,15 @@ export default function Contratos() {
         onChangeText={(e) => setSearch(e)}
         value={search}
       />
-      <ListaContratos></ListaContratos>
+      <ListaContratos
+        contratos={
+          search === ""
+            ? contratosCreados
+            : contratosCreados.filter((contrato) =>
+                contrato.filename.toLowerCase().includes(search.toLowerCase())
+              )
+        }
+      ></ListaContratos>
     </>
   );
 }

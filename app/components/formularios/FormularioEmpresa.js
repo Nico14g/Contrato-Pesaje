@@ -1,5 +1,5 @@
-import React, { useState, useEffect, createContext } from "react";
-import { View, StyleSheet, ScrollView, Text } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, ScrollView, Text, FlatList } from "react-native";
 import { Input, Icon, Button } from "react-native-elements";
 import { validateRut, formatRut } from "@fdograph/rut-utilities";
 import { useFormik, FormikProvider } from "formik";
@@ -7,7 +7,7 @@ import { db } from "../../api/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { FormularioAutocompleteEmpresa } from "./FormularioAutocompleteEmpresa";
 import { storeData, readData } from "../../utilidades/variablesGlobales";
-export const EmpresaContext = createContext();
+import { useKeyboard } from "@react-native-community/hooks";
 
 export const FormularioEmpresa = (props) => {
   const { isEnabled, empresas, setEmpresas, setIndex } = props;
@@ -25,6 +25,7 @@ export const FormularioEmpresa = (props) => {
     rutRazonSocial: "",
     rutRepresentante: "",
   });
+  const keyboard = useKeyboard();
 
   const validar = () => {
     setIsPressed(true);
@@ -79,157 +80,182 @@ export const FormularioEmpresa = (props) => {
   };
 
   return (
-    <EmpresaContext.Provider value={{ empresa, setEmpresa }}>
-      <FormikProvider value={formik}>
-        <>
-          {!isEnabled && (
-            <ScrollView
-              style={styles.scrollView}
-              keyboardShouldPersistTaps="always"
-            >
-              <Input
-                containerStyle={styles.container}
-                inputContainerStyle={styles.inputContainer}
-                style={styles.input}
-                placeholderTextColor="gray"
-                placeholder="Razón Social"
-                onChangeText={(e) => actualizarEstado(e, "razonSocial")}
-                onBlur={handleBlur("razonSocial")}
+    <FormikProvider value={formik}>
+      <>
+        {!isEnabled && (
+          <ScrollView
+            style={[
+              styles.scrollView,
+              keyboard.keyboardShown
+                ? { maxHeight: "68%" }
+                : { maxHeight: "80%" },
+            ]}
+            keyboardShouldPersistTaps="always"
+          >
+            {/* <TextInput
+                mode="outlined"
+                label="Razón Social"
                 value={values.razonSocial}
-              />
-
-              <Input
-                containerStyle={styles.container}
-                inputContainerStyle={styles.inputContainer}
-                style={styles.input}
-                placeholderTextColor="gray"
-                placeholder="Rut Razón Social"
-                onChangeText={(e) => actualizarEstado(e, "rutRazonSocial")}
-                onBlur={() => {
-                  setValidateRutRazon(
-                    !validateRut(getFieldProps("rutRazonSocial").value)
-                  );
-                  setFieldValue(
-                    "rutRazonSocial",
-                    formatRut(getFieldProps("rutRazonSocial").value)
-                  );
-                }}
-                errorMessage={validateRutRazon && "Rut no válido"}
-                value={values.rutRazonSocial}
-              />
-
-              <Input
-                containerStyle={styles.container}
-                inputContainerStyle={styles.inputContainer}
-                style={styles.input}
-                placeholderTextColor="gray"
-                placeholder="Ciudad"
-                onChangeText={(e) => actualizarEstado(e, "ciudad")}
-                onBlur={handleBlur("ciudad")}
-                value={values.ciudad}
-              />
-
-              <Input
-                containerStyle={styles.container}
-                inputContainerStyle={styles.inputContainer}
-                style={styles.input}
-                placeholderTextColor="gray"
-                placeholder="Representante Legal"
-                onChangeText={(e) => actualizarEstado(e, "representante")}
-                onBlur={handleBlur("representante")}
-                value={values.representante}
-              />
-
-              <Input
-                containerStyle={styles.container}
-                inputContainerStyle={styles.inputContainer}
-                style={styles.input}
-                placeholderTextColor="gray"
-                placeholder="Rut Representante Legal"
-                onChangeText={(e) => actualizarEstado(e, "rutRepresentante")}
-                onBlur={() => {
-                  setValidateRutRepresentante(
-                    !validateRut(getFieldProps("rutRepresentante").value)
-                  );
-                  setFieldValue(
-                    "rutRepresentante",
-                    formatRut(getFieldProps("rutRepresentante").value)
-                  );
-                }}
-                errorMessage={validateRutRepresentante && "Rut no válido"}
-                value={values.rutRepresentante}
-              />
-
-              <Input
-                containerStyle={styles.container}
-                inputContainerStyle={styles.inputContainer}
-                style={styles.input}
-                placeholderTextColor="gray"
-                placeholder="Cargo del Representante"
-                onChangeText={(e) => actualizarEstado(e, "cargoRepresentante")}
-                onBlur={handleBlur("cargoRepresentante")}
-                value={values.cargoRepresentante}
-              />
-
-              <Input
-                containerStyle={styles.container}
-                inputContainerStyle={styles.inputContainer}
-                style={styles.input}
-                placeholderTextColor="gray"
-                placeholder="Dirección Empresa"
-                onChangeText={(e) => actualizarEstado(e, "direccion")}
-                onBlur={handleBlur("direccion")}
-                value={values.direccion}
-              />
-            </ScrollView>
-          )}
-
-          {isEnabled && (
-            <FormularioAutocompleteEmpresa
-              empresas={empresas}
-              empresa={empresa}
-              setEmpresa={setEmpresa}
-              setValues={setValues}
-              values={values}
-              setValidateRutRazon={setValidateRutRazon}
-              setValidateRutRepresentante={setValidateRutRepresentante}
+                onChangeText={(e) => actualizarEstado(e, "razonSocial")}
+                style={styles.textInput}
+                selectionColor="blue"
+                activeOutlineColor="blue"
+                outlineColor="blue"
+              /> */}
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Razón Social"
+              onChangeText={(e) => actualizarEstado(e, "razonSocial")}
+              onBlur={handleBlur("razonSocial")}
+              value={values.razonSocial}
             />
-          )}
-          <View style={styles.bottomContainer}>
-            <View style={styles.item}>
-              {isPressed && !isValid && (
-                <Text style={{ color: "red" }}>
-                  Faltan campos por completar
-                </Text>
-              )}
-            </View>
-            <View style={styles.item2}>
-              <Button
-                onPress={() => validar()}
-                buttonStyle={styles.boton}
-                icon={
-                  <Icon
-                    type="material-community"
-                    name="arrow-right"
-                    size={16}
-                    color="white"
-                  />
-                }
-                iconRight
-                titleStyle={{ fontSize: 14 }}
-                title="Siguiente"
-              />
-            </View>
+
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Rut Razón Social"
+              onChangeText={(e) => actualizarEstado(e, "rutRazonSocial")}
+              onBlur={() => {
+                setValidateRutRazon(
+                  !validateRut(getFieldProps("rutRazonSocial").value)
+                );
+                setFieldValue(
+                  "rutRazonSocial",
+                  formatRut(getFieldProps("rutRazonSocial").value)
+                );
+              }}
+              errorMessage={validateRutRazon && "Rut no válido"}
+              value={values.rutRazonSocial}
+            />
+
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Ciudad"
+              onChangeText={(e) => actualizarEstado(e, "ciudad")}
+              onBlur={handleBlur("ciudad")}
+              value={values.ciudad}
+            />
+
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Representante Legal"
+              onChangeText={(e) => actualizarEstado(e, "representante")}
+              onBlur={handleBlur("representante")}
+              value={values.representante}
+            />
+
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Rut Representante Legal"
+              onChangeText={(e) => actualizarEstado(e, "rutRepresentante")}
+              onBlur={() => {
+                setValidateRutRepresentante(
+                  !validateRut(getFieldProps("rutRepresentante").value)
+                );
+                setFieldValue(
+                  "rutRepresentante",
+                  formatRut(getFieldProps("rutRepresentante").value)
+                );
+              }}
+              errorMessage={validateRutRepresentante && "Rut no válido"}
+              value={values.rutRepresentante}
+            />
+
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Cargo del Representante"
+              onChangeText={(e) => actualizarEstado(e, "cargoRepresentante")}
+              onBlur={handleBlur("cargoRepresentante")}
+              value={values.cargoRepresentante}
+            />
+
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainer}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Dirección Empresa"
+              onChangeText={(e) => actualizarEstado(e, "direccion")}
+              onBlur={handleBlur("direccion")}
+              value={values.direccion}
+            />
+          </ScrollView>
+        )}
+
+        {isEnabled && (
+          <View
+            style={
+              keyboard.keyboardShown
+                ? { maxHeight: "68%" }
+                : { maxHeight: "80%" }
+            }
+          >
+            <FlatList
+              // other FlatList props
+              keyboardShouldPersistTaps="always"
+              data={[]}
+              ListFooterComponent={
+                <FormularioAutocompleteEmpresa
+                  empresas={empresas}
+                  empresa={empresa}
+                  setEmpresa={setEmpresa}
+                  setValues={setValues}
+                  values={values}
+                  setValidateRutRazon={setValidateRutRazon}
+                  setValidateRutRepresentante={setValidateRutRepresentante}
+                />
+              }
+            />
           </View>
-        </>
-      </FormikProvider>
-    </EmpresaContext.Provider>
+        )}
+        <View style={styles.bottomContainer}>
+          <View style={styles.item}>
+            {isPressed && !isValid && (
+              <Text style={{ color: "red" }}>Faltan campos por completar</Text>
+            )}
+          </View>
+          <View style={styles.item2}>
+            <Button
+              onPress={() => validar()}
+              buttonStyle={styles.boton}
+              icon={
+                <Icon
+                  type="material-community"
+                  name="arrow-right"
+                  size={16}
+                  color="white"
+                />
+              }
+              iconRight
+              titleStyle={{ fontSize: 14 }}
+              title="Siguiente"
+            />
+          </View>
+        </View>
+      </>
+    </FormikProvider>
   );
 };
 
 const styles = StyleSheet.create({
   scrollView: {
-    maxHeight: "70%",
     minHeight: "60%",
   },
   container: {
@@ -264,6 +290,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     flexDirection: "row",
     backgroundColor: "#f2f2f2",
+    width: "100%",
   },
   item: {
     alignSelf: "center",
@@ -281,6 +308,10 @@ const styles = StyleSheet.create({
     top: 40,
     position: "absolute",
     zIndex: 10,
+  },
+  textInput: {
+    left: "5%",
+    width: "90%",
   },
 });
 /*

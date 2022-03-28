@@ -32,7 +32,6 @@ export const FormularioAnexos = (props) => {
       almacenarDatosBD();
 
       navigation.navigate("EdicionContrato");
-      console.log("generando contrato");
     }
   };
 

@@ -5,13 +5,13 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  PermissionsAndroid,
   ActivityIndicator,
   Text,
 } from "react-native";
+import { Menu } from "react-native-paper";
 import { SnackBar } from "../utilidades/Snackbar";
-
-import { Header as HeaderRNE, Icon, ListItem } from "react-native-elements";
+import { storeData } from "../utilidades/variablesGlobales";
+import { Header as HeaderRNE, Icon } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { readData } from "../utilidades/variablesGlobales";
@@ -31,28 +31,20 @@ export default function EdicionContrato() {
   const [datosEmpleado, setDatosEmpleado] = useState("");
   const [datosServicio, setDatosServicio] = useState("");
   const [datosAnexos, setDatosAnexos] = useState("");
+  const [contratosCreados, setContratosCreados] = useState([]);
   const [mostrar, setMostrar] = useState(false);
   const [wordDocument, setWordDocument] = useState("");
+  const [message, setMessage] = useState("");
   const [open, setOpen] = useState(false);
   const [fileName, setFileName] = useState("");
   const keyboard = useKeyboard();
   const navigation = useNavigation();
 
-  const componentMounted = useRef(true);
   const STORAGE_KEY = "@plantillaSelect";
+  const CONTRATOS_KEY = "@contratosCreados";
   const [html, setHtml] = useState("");
   const richText = useRef();
 
-  const list = [
-    {
-      title: "Guardar",
-      icon: "save",
-    },
-    {
-      title: "Compartir",
-      icon: "share",
-    },
-  ];
   useEffect(() => {
     Promise.all([
       readData(STORAGE_KEY),
@@ -60,15 +52,17 @@ export default function EdicionContrato() {
       readData("@datosEmpleado"),
       readData("@datosServicio"),
       readData("@datosAnexos"),
+      readData(CONTRATOS_KEY),
     ]).then(async (values) => {
       setPlantilla(values[0]);
       setDatosEmpresa(values[1]);
       setDatosEmpleado(values[2]);
       setDatosServicio(values[3]);
       setDatosAnexos(values[4]);
-      guardar(values[0], values[1], values[2], values[3], values[4]);
+      values[5] === null ? null : setContratosCreados(values[5]);
+      guardar(values[0], values[1], values[2], values[3], values[4], values[5]);
     });
-  }, []);
+  }, [html]);
 
   const docVars = (datosEmpresa, datosEmpleado, datosServicio, datosAnexos) => {
     return {
@@ -111,68 +105,57 @@ export default function EdicionContrato() {
     };
   };
 
+  const eliminarContrato = (contratos, plantilla) => {
+    setMessage("El archivo no se ha Encontrado");
+    setOpen(true);
+    const contratoFiltrado = contratos.filter(
+      (contrato) => contrato.id !== plantilla.item.id
+    );
+
+    storeData(contratoFiltrado, CONTRATOS_KEY);
+
+    setTimeout(() => {
+      Promise.resolve(navigation.navigate("Contratos"));
+    }, 2000);
+  };
+
   const guardar = async (
     plantilla,
     datosEmpresa,
     datosEmpleado,
     datosServicio,
-    datosAnexos
+    datosAnexos,
+    contratos
   ) => {
-    let content = await FileSystem.readAsStringAsync(plantilla.item.uri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    let document = Buffer.from(content, "base64");
+    const fileInfo = await FileSystem.getInfoAsync(plantilla.item.uri);
+    if (!fileInfo.exists) {
+      eliminarContrato(contratos, plantilla);
+    } else {
+      let content = await FileSystem.readAsStringAsync(plantilla.item.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      let document = Buffer.from(content, "base64");
 
-    const zip = new PizZip(document);
+      const zip = new PizZip(document);
 
-    const doc = new Docxtemplater(zip, {
-      paragraphLoop: true,
-      linebreaks: true,
-    });
+      const doc = new Docxtemplater(zip, {
+        paragraphLoop: true,
+        linebreaks: true,
+      });
 
-    doc.render({
-      ...docVars(datosEmpresa, datosEmpleado, datosServicio, datosAnexos),
-    });
-    setWordDocument(doc);
-    const buf = doc.getZip().generate({
-      type: "arrayBuffer",
-      mimeType:
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    });
+      doc.render({
+        ...docVars(datosEmpresa, datosEmpleado, datosServicio, datosAnexos),
+      });
+      setWordDocument(doc);
+      const buf = doc.getZip().generate({
+        type: "arrayBuffer",
+        mimeType:
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
 
-    const htmlResult = await convertToHtml({ arrayBuffer: buf });
+      const htmlResult = await convertToHtml({ arrayBuffer: buf });
 
-    setHtml(htmlResult.value);
-    // const a = Buffer.from(new Uint8Array(buf));
-    // let asd = Buffer.from(a).toString("base64");
-    // console.log(asd);
-    // let documenturi =
-    //   FileSystem.documentDirectory + `${encodeURI("documento")}.docx`;
-    // await FileSystem.writeAsStringAsync(documenturi, asd, {
-    //   encoding: FileSystem.EncodingType.Base64,
-    // });
-    // await Sharing.shareAsync(documenturi);
-  };
-
-  const requestCameraPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-        {
-          title: "Solicitud de Permiso",
-          message: "Es necesario para poder guardar el archivo",
-          buttonNeutral: "Pregúntame más tarde",
-          buttonNegative: "Cancelar",
-          buttonPositive: "Ok",
-        }
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        return true;
-      } else {
-        return false;
-      }
-    } catch (err) {
-      console.warn(err);
+      setHtml(htmlResult.value);
     }
   };
 
@@ -194,8 +177,19 @@ export default function EdicionContrato() {
     let { status } = await MediaLibrary.requestPermissionsAsync();
     if (status === "granted") {
       const uri = await MediaLibrary.createAssetAsync(documenturi);
+      setContratosCreados((contratos) => [...contratos, uri]);
+      storeData([...contratosCreados, uri], CONTRATOS_KEY);
+      Promise.resolve(readData(CONTRATOS_KEY)).then((data) =>
+        data === null ? null : setContratosCreados(data)
+      );
       setFileName(uri.filename);
+      setMessage(
+        uri.filename + " guardado en el almacenamiento interno /DCIM/"
+      );
       setOpen(true);
+      setTimeout(() => {
+        Promise.resolve(navigation.navigate("Contratos"));
+      }, 3000);
     }
   };
 
@@ -215,14 +209,6 @@ export default function EdicionContrato() {
       encoding: FileSystem.EncodingType.Base64,
     });
     await Sharing.shareAsync(documenturi);
-  };
-
-  const exportar = (tipo) => {
-    if (tipo === "Guardar") {
-      guardarLocal();
-    } else {
-      compartir();
-    }
   };
 
   return (
@@ -253,50 +239,53 @@ export default function EdicionContrato() {
           />
         </View>
 
-        {html === "" && (
-          <View style={styles.loaderPlantilla}>
-            <ActivityIndicator color="blue" size="large" />
-            <Text>Generando Contrato</Text>
-          </View>
-        )}
-
-        <View style={{ height: "90%" }}>
-          <TouchableOpacity onPress={() => setMostrar(false)}>
-            <ScrollView>
-              <KeyboardAvoidingView>
-                <RichEditor
-                  ref={richText}
-                  initialContentHTML={html}
-                  disabled={true}
+        {html === "" ? (
+          <>
+            <View style={styles.loaderPlantilla}>
+              <ActivityIndicator color="blue" size="large" />
+              <Text>Generando Contrato</Text>
+            </View>
+            {open && (
+              <SnackBar open={open} setOpen={setOpen} message={message} />
+            )}
+          </>
+        ) : (
+          <>
+            <View style={{ height: "90%" }}>
+              <TouchableOpacity onPress={() => setMostrar(false)}>
+                <ScrollView>
+                  <KeyboardAvoidingView>
+                    <RichEditor
+                      ref={richText}
+                      initialContentHTML={html === "" ? "" : html}
+                      disabled={true}
+                    />
+                  </KeyboardAvoidingView>
+                </ScrollView>
+              </TouchableOpacity>
+            </View>
+            {open && (
+              <SnackBar open={open} setOpen={setOpen} message={message} />
+            )}
+            {mostrar && (
+              <View style={[styles.overlaycontainer, { height: 70 }]}>
+                <Menu.Item
+                  icon="content-save"
+                  onPress={() => {
+                    guardarLocal();
+                  }}
+                  title="Guardar"
                 />
-              </KeyboardAvoidingView>
-            </ScrollView>
-          </TouchableOpacity>
-        </View>
-        {open && (
-          <SnackBar
-            open={open}
-            setOpen={setOpen}
-            message={fileName + " guardado en el almacenamiento interno /DCIM/"}
-          />
-        )}
-        {mostrar && (
-          <View style={[styles.overlaycontainer, { height: 40 }]}>
-            {list.map((item, i) => (
-              <ListItem
-                key={i}
-                bottomDivider
-                containerStyle={styles.listItem}
-                button
-                onPress={() => {
-                  exportar(item.title);
-                }}
-              >
-                <Icon name={item.icon} />
-                <ListItem.Title>{item.title}</ListItem.Title>
-              </ListItem>
-            ))}
-          </View>
+                <Menu.Item
+                  icon="share-variant"
+                  onPress={() => {
+                    compartir();
+                  }}
+                  title="Compartir"
+                />
+              </View>
+            )}
+          </>
         )}
       </View>
       {/* <View style={{ height: "90%" }}>
@@ -357,7 +346,10 @@ const styles = StyleSheet.create({
     right: "5%",
     top: 0,
     opacity: 1,
-
+    backgroundColor: "white",
+    borderRadius: 9,
+    borderWidth: 1,
+    borderColor: "lightgrey",
     marginTop: "15%",
   },
   listItem: {
@@ -366,5 +358,10 @@ const styles = StyleSheet.create({
     borderColor: "lightgrey",
     height: 80,
   },
-  loaderPlantilla: { marginTop: 10, marginBottom: 10, alignItems: "center" },
+  loaderPlantilla: {
+    marginTop: 10,
+    marginBottom: 10,
+    alignItems: "center",
+    height: "85%",
+  },
 });

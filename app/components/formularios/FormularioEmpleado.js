@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Text } from "react-native";
+import { View, StyleSheet, ScrollView, Text, FlatList } from "react-native";
 import { Input, Icon, Button } from "react-native-elements";
 import { validateRut, formatRut } from "@fdograph/rut-utilities";
 import { useFormik, FormikProvider } from "formik";
@@ -8,6 +8,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { DatePicker } from "../../utilidades/datePicker";
 import { FormularioAutocompleteEmpleado } from "./FormularioAutocompleteEmpleado";
 import { storeData } from "../../utilidades/variablesGlobales";
+import { useKeyboard } from "@react-native-community/hooks";
 
 export const FormularioEmpleado = (props) => {
   const { isEnabled, empleados, empleado, setEmpleado, setIndex } = props;
@@ -17,6 +18,7 @@ export const FormularioEmpleado = (props) => {
   const [selectedDay, setSelectedDay] = useState("1");
   const [selectedMonth, setSelectedMonth] = useState("01");
   const [selectedYear, setSelectedYear] = useState("1960");
+  const keyboard = useKeyboard();
 
   const validar = () => {
     setIsPressed(true);
@@ -76,7 +78,15 @@ export const FormularioEmpleado = (props) => {
     <FormikProvider value={formik}>
       <>
         {!isEnabled ? (
-          <ScrollView style={styles.scrollView}>
+          <ScrollView
+            style={[
+              styles.scrollView,
+              keyboard.keyboardShown
+                ? { maxHeight: "60%" }
+                : { maxHeight: "76%" },
+            ]}
+            keyboardShouldPersistTaps="always"
+          >
             <Input
               containerStyle={styles.container}
               inputContainerStyle={styles.inputContainer}
@@ -174,20 +184,35 @@ export const FormularioEmpleado = (props) => {
             />
           </ScrollView>
         ) : (
-          <FormularioAutocompleteEmpleado
-            empleados={empleados}
-            empleado={empleado}
-            setEmpleado={setEmpleado}
-            selectedDay={selectedDay}
-            setSelectedDay={setSelectedDay}
-            selectedMonth={selectedMonth}
-            setSelectedMonth={setSelectedMonth}
-            selectedYear={selectedYear}
-            setSelectedYear={setSelectedYear}
-            setValues={setValues}
-            values={values}
-            setValidateRutEmpleado={setValidateRutEmpleado}
-          />
+          <View
+            style={
+              keyboard.keyboardShown
+                ? { maxHeight: "60%" }
+                : { maxHeight: "76%" }
+            }
+          >
+            <FlatList
+              // other FlatList props
+              keyboardShouldPersistTaps="always"
+              data={[]}
+              ListFooterComponent={
+                <FormularioAutocompleteEmpleado
+                  empleados={empleados}
+                  empleado={empleado}
+                  setEmpleado={setEmpleado}
+                  selectedDay={selectedDay}
+                  setSelectedDay={setSelectedDay}
+                  selectedMonth={selectedMonth}
+                  setSelectedMonth={setSelectedMonth}
+                  selectedYear={selectedYear}
+                  setSelectedYear={setSelectedYear}
+                  setValues={setValues}
+                  values={values}
+                  setValidateRutEmpleado={setValidateRutEmpleado}
+                />
+              }
+            />
+          </View>
         )}
         <View style={styles.bottomContainer}>
           <View style={styles.item}>
@@ -220,7 +245,6 @@ export const FormularioEmpleado = (props) => {
 
 const styles = StyleSheet.create({
   scrollView: {
-    maxHeight: "70%",
     minHeight: "60%",
   },
   container: {
@@ -255,6 +279,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     flexDirection: "row",
     backgroundColor: "#f2f2f2",
+    width: "100%",
+    height: 60,
   },
   item: {
     alignSelf: "center",

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Text } from "react-native";
+import { View, StyleSheet, ScrollView, Text, FlatList } from "react-native";
 import { Input, Icon, Button } from "react-native-elements";
 import { useFormik, FormikProvider } from "formik";
 import { db } from "../../api/firebase";
@@ -9,6 +9,7 @@ import { Picker } from "@react-native-picker/picker";
 import { FormularioAutocompleteAnexos } from "./FormularioAutocompleteAnexos";
 import { useNavigation } from "@react-navigation/native";
 import { storeData } from "../../utilidades/variablesGlobales";
+import { useKeyboard } from "@react-native-community/hooks";
 
 export const FormularioAnexos = (props) => {
   const { isEnabled, anexos, anexo, setAnexo } = props;
@@ -23,6 +24,7 @@ export const FormularioAnexos = (props) => {
   );
   const [selectedPension, setSelectedPension] = useState("Regimen de Pensión");
   const [selectedSalud, setSelectedSalud] = useState("Regimen de Salud");
+  const keyboard = useKeyboard();
 
   const validar = () => {
     // enviar a edicion
@@ -90,7 +92,15 @@ export const FormularioAnexos = (props) => {
     <FormikProvider value={formik}>
       <>
         {!isEnabled ? (
-          <ScrollView style={styles.scrollView}>
+          <ScrollView
+            style={[
+              styles.scrollView,
+              keyboard.keyboardShown
+                ? { maxHeight: "68%" }
+                : { maxHeight: "80%" },
+            ]}
+            keyboardShouldPersistTaps="always"
+          >
             <View style={{ marginBottom: 20 }}>
               <DatePicker
                 title="Fecha de Inicio de Faenas"
@@ -107,13 +117,15 @@ export const FormularioAnexos = (props) => {
             </View>
             <Input
               containerStyle={styles.container}
-              inputContainerStyle={styles.inputContainer}
+              inputContainerStyle={styles.inputContainerBeneficios}
               style={styles.input}
               placeholderTextColor="gray"
               placeholder="Beneficios"
               onChangeText={(e) => actualizarEstado(e, "beneficios")}
               onBlur={handleBlur("beneficios")}
               value={values.beneficios}
+              multiline={true}
+              numberOfLines={10}
             />
             <View style={styles.picker}>
               <Picker
@@ -157,23 +169,38 @@ export const FormularioAnexos = (props) => {
             />
           </ScrollView>
         ) : (
-          <FormularioAutocompleteAnexos
-            anexos={anexos}
-            anexo={anexo}
-            setAnexo={setAnexo}
-            selectedDay={selectedDay}
-            setSelectedDay={setSelectedDay}
-            selectedMonth={selectedMonth}
-            setSelectedMonth={setSelectedMonth}
-            selectedYear={selectedYear}
-            setSelectedYear={setSelectedYear}
-            selectedPension={selectedPension}
-            setSelectedPension={setSelectedPension}
-            selectedSalud={selectedSalud}
-            setSelectedSalud={setSelectedSalud}
-            setValues={setValues}
-            values={values}
-          />
+          <View
+            style={
+              keyboard.keyboardShown
+                ? { maxHeight: "50%" }
+                : { maxHeight: "70%" }
+            }
+          >
+            <FlatList
+              // other FlatList props
+              keyboardShouldPersistTaps="always"
+              data={[]}
+              ListFooterComponent={
+                <FormularioAutocompleteAnexos
+                  anexos={anexos}
+                  anexo={anexo}
+                  setAnexo={setAnexo}
+                  selectedDay={selectedDay}
+                  setSelectedDay={setSelectedDay}
+                  selectedMonth={selectedMonth}
+                  setSelectedMonth={setSelectedMonth}
+                  selectedYear={selectedYear}
+                  setSelectedYear={setSelectedYear}
+                  selectedPension={selectedPension}
+                  setSelectedPension={setSelectedPension}
+                  selectedSalud={selectedSalud}
+                  setSelectedSalud={setSelectedSalud}
+                  setValues={setValues}
+                  values={values}
+                />
+              }
+            />
+          </View>
         )}
         <View style={styles.item}>
           {isPressed && !isValid && (
@@ -218,9 +245,18 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     height: 50,
   },
+  inputContainerBeneficios: {
+    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: "lightgrey",
+    backgroundColor: "white",
+    paddingBottom: 15,
+    height: 80,
+  },
   input: {
     height: 49,
     paddingHorizontal: 10,
+    paddingVertical: 0,
     fontSize: 16,
   },
   boton: {
@@ -238,10 +274,11 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     alignItems: "center",
     width: "65%",
+    marginTop: 10,
   },
   item2: {
     alignSelf: "center",
-    marginTop: 10,
+    marginTop: 20,
     marginBottom: 10,
   },
   picker: {

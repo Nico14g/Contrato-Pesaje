@@ -1,17 +1,19 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Text } from "react-native";
+import { View, StyleSheet, ScrollView, Text, FlatList } from "react-native";
 import { Input, Icon, Button } from "react-native-elements";
 import { useFormik, FormikProvider } from "formik";
 import { db } from "../../api/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { FormularioAutocompleteServicio } from "./FormularioAutocompleteServicio";
 import { storeData } from "../../utilidades/variablesGlobales";
+import { useKeyboard } from "@react-native-community/hooks";
 
 export const FormularioServicio = (props) => {
   const { isEnabled, servicios, servicio, setServicio, setIndex } = props;
   //validar horas y sueldo
   const [isValid, setIsValid] = useState(true);
   const [isPressed, setIsPressed] = useState(false);
+  const keyboard = useKeyboard();
 
   const validar = async () => {
     setIsPressed(true);
@@ -66,7 +68,15 @@ export const FormularioServicio = (props) => {
     <FormikProvider value={formik}>
       <>
         {!isEnabled ? (
-          <ScrollView style={styles.scrollView}>
+          <ScrollView
+            style={[
+              styles.scrollView,
+              keyboard.keyboardShown
+                ? { maxHeight: "68%" }
+                : { maxHeight: "80%" },
+            ]}
+            keyboardShouldPersistTaps="always"
+          >
             <Input
               containerStyle={styles.container}
               inputContainerStyle={styles.inputContainer}
@@ -156,13 +166,28 @@ export const FormularioServicio = (props) => {
             />
           </ScrollView>
         ) : (
-          <FormularioAutocompleteServicio
-            servicios={servicios}
-            servicio={servicio}
-            setServicio={setServicio}
-            setValues={setValues}
-            values={values}
-          />
+          <View
+            style={
+              keyboard.keyboardShown
+                ? { maxHeight: "68%" }
+                : { maxHeight: "80%" }
+            }
+          >
+            <FlatList
+              // other FlatList props
+              keyboardShouldPersistTaps="always"
+              data={[]}
+              ListFooterComponent={
+                <FormularioAutocompleteServicio
+                  servicios={servicios}
+                  servicio={servicio}
+                  setServicio={setServicio}
+                  setValues={setValues}
+                  values={values}
+                />
+              }
+            />
+          </View>
         )}
 
         <View style={styles.bottomContainer}>
@@ -196,7 +221,6 @@ export const FormularioServicio = (props) => {
 
 const styles = StyleSheet.create({
   scrollView: {
-    maxHeight: "70%",
     minHeight: "60%",
   },
   container: {
@@ -227,7 +251,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   bottomContainer: {
+    bottom: 0,
+    position: "absolute",
     flexDirection: "row",
+    backgroundColor: "#f2f2f2",
+    width: "100%",
   },
   item: {
     alignSelf: "center",

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Text, ScrollView, Dimensions } from "react-native";
+import { View, StyleSheet, Text, Dimensions } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Autocomplete from "react-native-autocomplete-input";
 import { validateRut, formatRut } from "@fdograph/rut-utilities";
@@ -34,8 +34,6 @@ export const FormularioAutocompleteEmpresa = (props) => {
     rutRazonSocial: [],
     rutRepresentante: [],
   });
-
-  const width = Dimensions.get("window").width;
 
   useEffect(() => {
     let list = {
@@ -83,7 +81,7 @@ export const FormularioAutocompleteEmpresa = (props) => {
         inputContainerStyle={styles.autoCompleteInput}
         data={options.razonSocial}
         placeholderTextColor="gray"
-        placeholder="Razón social"
+        placeholder="Razón Social"
         value={empresa.razonSocial}
         onChangeText={(text) => {
           setEmpresa({ ...empresa, razonSocial: text });
@@ -491,7 +489,7 @@ const styles = StyleSheet.create({
         flatListProps={{
           keyExtractor: (_, idx) => idx,
           renderItem: ({ item }) => (
-            <TouchableOpacity
+            <TouchableOpacity 
               onPress={() => {
                 console.log(item);
                 setEmpresa({ ...empresa, razonSocial: item });

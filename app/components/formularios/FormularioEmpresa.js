@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, ScrollView, Text, FlatList } from "react-native";
 import { Input, Icon, Button } from "react-native-elements";
 import { validateRut, formatRut } from "@fdograph/rut-utilities";
@@ -6,7 +6,7 @@ import { useFormik, FormikProvider } from "formik";
 import { db } from "../../api/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { FormularioAutocompleteEmpresa } from "./FormularioAutocompleteEmpresa";
-import { storeData, readData } from "../../utilidades/variablesGlobales";
+import { storeData } from "../../utilidades/variablesGlobales";
 import { useKeyboard } from "@react-native-community/hooks";
 
 export const FormularioEmpresa = (props) => {

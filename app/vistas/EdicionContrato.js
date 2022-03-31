@@ -64,12 +64,44 @@ export default function EdicionContrato() {
     });
   }, [html]);
 
+  const obtenerMes = (mes) => {
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const meses = [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
+    ];
+    return meses[months.indexOf(mes)];
+  };
+
   const docVars = (datosEmpresa, datosEmpleado, datosServicio, datosAnexos) => {
     return {
       direccionEmpresa: datosEmpresa.direccion,
-      dia: "",
-      mes: "",
-      anio: "",
+      dia: new Date().toUTCString().split(" ", 4)[1],
+      mes: obtenerMes(new Date().toUTCString().split(" ", 4)[2]),
+      anio: new Date().toUTCString().split(" ", 4)[3],
       razonSocial: datosEmpresa.razonSocial,
       rutRazonSocial: datosEmpresa.rutRazonSocial,
       representante: datosEmpresa.representante,

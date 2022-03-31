@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Text, ScrollView } from "react-native";
+import { View, StyleSheet, Text, Dimensions } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Autocomplete from "react-native-autocomplete-input";
 import { DatePicker } from "../../utilidades/datePicker";
@@ -82,149 +82,147 @@ export const FormularioAutocompleteAnexos = (props) => {
   };
 
   return (
-    <ScrollView horizontal={false} style={styles.ScrollViewA}>
-      <ScrollView horizontal={true}>
-        <View>
-          <DatePicker
-            title="Fecha de Inicio de Faenas"
-            selectedDay={selectedDay}
-            setSelectedDay={setSelectedDay}
-            selectedMonth={selectedMonth}
-            setSelectedMonth={setSelectedMonth}
-            selectedYear={selectedYear}
-            setSelectedYear={setSelectedYear}
-            since={new Date().getFullYear()}
-            to={new Date().getFullYear() + 1}
-            width="103%"
+    <View>
+      <View style={styles.scrollView}>
+        <DatePicker
+          title="Fecha de Inicio de Faenas"
+          selectedDay={selectedDay}
+          setSelectedDay={setSelectedDay}
+          selectedMonth={selectedMonth}
+          setSelectedMonth={setSelectedMonth}
+          selectedYear={selectedYear}
+          setSelectedYear={setSelectedYear}
+          since={new Date().getFullYear()}
+          to={new Date().getFullYear() + 1}
+          width="100%"
+        />
+        <View style={{ marginTop: 30 }}></View>
+        <Autocomplete
+          style={styles.autoComplete}
+          containerStyle={styles.autoCompleteContainerBeneficios}
+          inputContainerStyle={styles.autoCompleteInputBeneficios}
+          data={options.beneficios}
+          placeholderTextColor="gray"
+          multiline={true}
+          numberOfLines={10}
+          placeholder="Beneficios"
+          value={anexo.beneficios}
+          onChangeText={(text) => {
+            setAnexo({ ...anexo, beneficios: text });
+            setValues({ ...values, beneficios: text });
+            setOptions({
+              ...options,
+              beneficios: query("beneficios").filter((anexo) => {
+                return anexo.toLowerCase().includes(text.toLowerCase());
+              }),
+            });
+            setHideResults({ ...hideResults, beneficios: false });
+          }}
+          onFocus={() => setHideResults({ ...hideResults, beneficios: false })}
+          onEndEditing={() =>
+            setHideResults({ ...hideResults, beneficios: true })
+          }
+          hideResults={hideResults.beneficios}
+          flatListProps={{
+            nestedScrollEnabled: () => true,
+            keyExtractor: (_, idx) => idx,
+            renderItem: ({ item }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  seleccion(item, "beneficios");
+                  setOptions({
+                    ...options,
+                    beneficios: [],
+                  });
+                  setHideResults({ ...hideResults, beneficios: true });
+                }}
+              >
+                <Text style={{ fontSize: 16 }}>{item}</Text>
+              </TouchableOpacity>
+            ),
+          }}
+        />
+      </View>
+
+      <View style={styles.picker}>
+        <Picker
+          selectedValue={selectedPension}
+          onValueChange={(itemValue, itemIndex) =>
+            setSelectedPension(itemValue)
+          }
+          mode="dropdown"
+        >
+          <Picker.Item label="Regimen Antiguo" value={"Regimen Antiguo"} />
+          <Picker.Item
+            label="Regimen Nuevo A.F.P"
+            value={"Regimen Nuevo A.F.P"}
           />
-          <View style={{ marginTop: 20 }}></View>
-          <Autocomplete
-            style={styles.autoComplete}
-            containerStyle={styles.autoCompleteContainer}
-            inputContainerStyle={styles.autoCompleteInput}
-            data={options.beneficios}
-            placeholderTextColor="gray"
-            placeholder="Beneficios"
-            value={anexo.beneficios}
-            onChangeText={(text) => {
-              setAnexo({ ...anexo, beneficios: text });
-              setValues({ ...values, beneficios: text });
-              setOptions({
-                ...options,
-                beneficios: query("beneficios").filter((anexo) => {
+        </Picker>
+      </View>
+
+      <View style={styles.picker}>
+        <Picker
+          selectedValue={selectedSalud}
+          onValueChange={(itemValue, itemIndex) => setSelectedSalud(itemValue)}
+          mode="dropdown"
+        >
+          <Picker.Item label="Fonasa" value={"Fonasa"} />
+          <Picker.Item label="Isapre" value={"Isapre"} />
+        </Picker>
+      </View>
+      <View style={styles.scrollView}>
+        <Autocomplete
+          style={styles.autoComplete}
+          containerStyle={styles.autoCompleteContainer}
+          inputContainerStyle={styles.autoCompleteInput}
+          data={options.cantidadEjemplares}
+          placeholderTextColor="gray"
+          placeholder="Cantidad Ejemplares"
+          value={anexo.cantidadEjemplares}
+          onChangeText={(text) => {
+            setAnexo({ ...anexo, cantidadEjemplares: text });
+            setValues({ ...values, cantidadEjemplares: text });
+            setOptions({
+              ...options,
+              cantidadEjemplares: query("cantidadEjemplares").filter(
+                (anexo) => {
                   return anexo.toLowerCase().includes(text.toLowerCase());
-                }),
-              });
-              setHideResults({ ...hideResults, beneficios: false });
-            }}
-            onFocus={() =>
-              setHideResults({ ...hideResults, beneficios: false })
-            }
-            onEndEditing={() =>
-              setHideResults({ ...hideResults, beneficios: true })
-            }
-            hideResults={hideResults.beneficios}
-            flatListProps={{
-              nestedScrollEnabled: () => true,
-              keyExtractor: (_, idx) => idx,
-              renderItem: ({ item }) => (
-                <TouchableOpacity
-                  onPress={() => {
-                    seleccion(item, "beneficios");
-                    setOptions({
-                      ...options,
-                      beneficios: [],
-                    });
-                    setHideResults({ ...hideResults, beneficios: true });
-                  }}
-                >
-                  <Text style={{ fontSize: 16 }}>{item}</Text>
-                </TouchableOpacity>
+                }
               ),
-            }}
-          />
-
-          <View style={styles.picker}>
-            <Picker
-              selectedValue={selectedPension}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedPension(itemValue)
-              }
-              mode="dropdown"
-            >
-              <Picker.Item label="Regimen Antiguo" value={"Regimen Antiguo"} />
-              <Picker.Item
-                label="Regimen Nuevo A.F.P"
-                value={"Regimen Nuevo A.F.P"}
-              />
-            </Picker>
-          </View>
-          <View style={styles.picker}>
-            <Picker
-              selectedValue={selectedSalud}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedSalud(itemValue)
-              }
-              mode="dropdown"
-            >
-              <Picker.Item label="Fonasa" value={"Fonasa"} />
-              <Picker.Item label="Isapre" value={"Isapre"} />
-            </Picker>
-          </View>
-
-          <Autocomplete
-            style={styles.autoComplete}
-            containerStyle={styles.autoCompleteContainer}
-            inputContainerStyle={styles.autoCompleteInput}
-            data={options.cantidadEjemplares}
-            placeholderTextColor="gray"
-            placeholder="Cantidad Ejemplares"
-            value={anexo.cantidadEjemplares}
-            onChangeText={(text) => {
-              setAnexo({ ...anexo, cantidadEjemplares: text });
-              setValues({ ...values, cantidadEjemplares: text });
-              setOptions({
-                ...options,
-                cantidadEjemplares: query("cantidadEjemplares").filter(
-                  (anexo) => {
-                    return anexo.toLowerCase().includes(text.toLowerCase());
-                  }
-                ),
-              });
-              setHideResults({ ...hideResults, cantidadEjemplares: false });
-            }}
-            onFocus={() =>
-              setHideResults({ ...hideResults, cantidadEjemplares: false })
-            }
-            onEndEditing={() =>
-              setHideResults({ ...hideResults, cantidadEjemplares: true })
-            }
-            hideResults={hideResults.cantidadEjemplares}
-            flatListProps={{
-              nestedScrollEnabled: () => true,
-              keyExtractor: (_, idx) => idx,
-              renderItem: ({ item }) => (
-                <TouchableOpacity
-                  onPress={() => {
-                    seleccion(item, "cantidadEjemplares");
-                    setOptions({
-                      ...options,
-                      cantidadEjemplares: [],
-                    });
-                    setHideResults({
-                      ...hideResults,
-                      cantidadEjemplares: true,
-                    });
-                  }}
-                >
-                  <Text>{item}</Text>
-                </TouchableOpacity>
-              ),
-            }}
-          />
-        </View>
-      </ScrollView>
-    </ScrollView>
+            });
+            setHideResults({ ...hideResults, cantidadEjemplares: false });
+          }}
+          onFocus={() =>
+            setHideResults({ ...hideResults, cantidadEjemplares: false })
+          }
+          onEndEditing={() =>
+            setHideResults({ ...hideResults, cantidadEjemplares: true })
+          }
+          hideResults={hideResults.cantidadEjemplares}
+          flatListProps={{
+            nestedScrollEnabled: () => true,
+            keyExtractor: (_, idx) => idx,
+            renderItem: ({ item }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  seleccion(item, "cantidadEjemplares");
+                  setOptions({
+                    ...options,
+                    cantidadEjemplares: [],
+                  });
+                  setHideResults({
+                    ...hideResults,
+                    cantidadEjemplares: true,
+                  });
+                }}
+              >
+                <Text>{item}</Text>
+              </TouchableOpacity>
+            ),
+          }}
+        />
+      </View>
+    </View>
   );
 };
 
@@ -243,7 +241,22 @@ const styles = StyleSheet.create({
   autoCompleteContainer: {
     borderRadius: 7,
     marginBottom: 25,
-    width: 350,
+    width: Dimensions.get("window").width * 0.85,
+  },
+  autoCompleteContainerBeneficios: {
+    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: "lightgrey",
+    maxHeight: 80,
+    width: Dimensions.get("window").width * 0.85,
+    zIndex: 1,
+  },
+  autoCompleteInputBeneficios: {
+    borderRadius: 7,
+    borderWidth: 1,
+    backgroundColor: "white",
+    paddingTop: 10,
+    height: 80,
   },
   autoCompleteInput: {
     borderRadius: 7,
@@ -258,9 +271,15 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     borderWidth: 1,
     borderColor: "lightgrey",
-    maxWidth: "100%",
+    maxWidth: Dimensions.get("window").width * 0.85,
     backgroundColor: "white",
-
     marginBottom: 20,
+    marginLeft: "8%",
+  },
+  scrollView: {
+    alignItems: "center",
+    alignSelf: "center",
+    maxWidth: "90%",
+    marginBottom: 30,
   },
 });

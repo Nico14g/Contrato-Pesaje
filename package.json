@@ -13,6 +13,7 @@
   "dependencies": {
     "@fdograph/rut-utilities": "^1.3.7",
     "@react-native-async-storage/async-storage": "~1.15.0",
+    "@react-native-community/datetimepicker": "^6.1.2",
     "@react-native-community/hooks": "^2.8.1",
     "@react-native-picker/picker": "^2.1.0",
     "@react-navigation/bottom-tabs": "^6.0.9",
@@ -26,7 +27,7 @@
     "expo-media-library": "~13.0.3",
     "expo-sharing": "~10.0.3",
     "expo-status-bar": "~1.1.0",
-    "firebase": "^9.5.0",
+    "firebase": "^9.6.5",
     "formik": "^2.2.9",
     "mammoth": "^1.4.19",
     "pizzip": "^3.1.1",

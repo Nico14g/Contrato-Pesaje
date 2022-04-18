@@ -1,26 +1,39 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Icon } from "react-native-elements";
 import Contratos from "../vistas/Contratos";
 import TabProcesoContrato from "../vistas/TabProcesoContrato";
 import EdicionContrato from "../vistas/EdicionContrato";
+import { signOut } from "firebase/auth";
+import { auth } from "../api/firebase";
 
 const Stack = createNativeStackNavigator();
 
-export default function ContratoStack() {
+export default function ContratoStack(props) {
+  const { setUser } = props;
+
   return (
     <Stack.Navigator>
       <Stack.Screen
         name="Contratos"
         component={Contratos}
         options={{
-          title: "",
-          headerShadowVisible: false,
-          headerStyle: { backgroundColor: "#f1f3f9" },
+          title: "Contratos",
+          headerBackVisible: false,
+          headerStyle: { backgroundColor: "#2f3bc7" },
+          headerTintColor: "#ffffff",
           headerTitleStyle: {
-            color: "black",
-            fontSize: 30,
-            marginTop: 30,
+            color: "white",
           },
+          headerRight: () => (
+            <Icon
+              type="material-community"
+              name="login-variant"
+              size={25}
+              color="white"
+              onPress={() => signOut(auth).then(() => setUser(null))}
+            />
+          ),
         }}
       />
       <Stack.Screen

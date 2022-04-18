@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Contrato_Pesaje",
+    "name": "Prototipo Contrato",
     "slug": "Contrato_Pesaje",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -27,6 +27,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "description": ""
   }
 }

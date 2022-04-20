@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, StyleSheet, Text, Platform } from "react-native";
-import { Icon, Button } from "react-native-elements";
+import { View, StyleSheet, Platform } from "react-native";
+import { Icon, Button, Text } from "react-native-elements";
 import Autocomplete from "react-native-autocomplete-input";
 
 export default function Pesaje(props) {
-  const { setIndex } = props;
+  const { setIndex, user } = props;
   const componentMounted = useRef(true);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function Pesaje(props) {
     <>
       <View style={styles.container}>
         <View style={styles.item}>
-          <Text style={styles.subtitulo}>Pesaje</Text>
+          <Text h4>Pesaje de fruta</Text>
         </View>
 
         <View style={styles.nuevo}></View>
@@ -30,10 +30,6 @@ export default function Pesaje(props) {
 }
 
 const styles = StyleSheet.create({
-  subtitulo: {
-    fontSize: 20,
-    fontWeight: "600",
-  },
   container: {
     flex: 1,
     flexDirection: "row",
@@ -48,8 +44,8 @@ const styles = StyleSheet.create({
     flexDirection: "row-reverse",
     alignSelf: "center",
   },
+
   nuevo: {
-    alignSelf: "center",
     alignItems: "center",
     width: "30%",
   },
@@ -65,17 +61,13 @@ const styles = StyleSheet.create({
   },
 
   containerSearchBar: {
-    maxHeight: "10%",
+    marginBottom: 15,
     alignSelf: "center",
+    alignItems: "center",
     width: "90%",
     padding: 0,
   },
   inputSearchBar: {
     backgroundColor: "#ffffff",
-    padding: 0,
-  },
-  mainConatinerStyle: {
-    flexDirection: "column",
-    flex: 1,
   },
 });

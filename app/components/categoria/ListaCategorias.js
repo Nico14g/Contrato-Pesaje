@@ -58,6 +58,19 @@ export default function ListaCategorias(props) {
   );
 }
 
+const options = {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  hour: "numeric",
+  minute: "numeric",
+};
+
+const mostrarFechaTermino = (dateEnd) => {
+  if (dateEnd === "") return true;
+  return dateEnd.toDate().toLocaleDateString("es-CL", options);
+};
+
 function Categoria(props) {
   const { categoria, setIndex } = props;
   const STORAGE_KEY = "@categoriaSelect";
@@ -69,10 +82,22 @@ function Categoria(props) {
     <TouchableOpacity onPress={() => seleccionarCategoria()}>
       <Card>
         <View style={styles.viewContainer}>
-          <View style={styles.colB}>
+          <View style={styles.colA}>
             <Text style={styles.nombreText}>
-              {categoria.item.name.substr(0, 25)}
+              {categoria.item.name.substr(0, 17)}
             </Text>
+          </View>
+          <View style={styles.colB}>
+            {mostrarFechaTermino(categoria.item.dateEnd) === true ? (
+              <Text style={styles.textoFecha}>En Progreso</Text>
+            ) : (
+              <Text style={styles.textoFecha}>
+                {categoria.item.dateStart
+                  .toDate()
+                  .toLocaleDateString("es-CL", options)}{" "}
+                - {mostrarFechaTermino(categoria.item.dateEnd)}
+              </Text>
+            )}
           </View>
           <View style={styles.colC}>
             <Icon name="chevron-right" type="material-community" size={30} />
@@ -95,22 +120,25 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "flex-start",
+    height: 40,
   },
   colA: {
-    width: "20%",
+    width: "40%",
   },
   colB: {
-    alignItems: "flex-start",
-    alignSelf: "center",
-    width: "80%",
+    width: "40%",
   },
   colC: {
     alignSelf: "center",
-    width: "20%",
+    width: "30%",
   },
-
+  textoFecha: {
+    alignSelf: "center",
+    marginTop: "7%",
+  },
   nombreText: {
     fontWeight: "bold",
+    marginTop: "7%",
   },
   texto: {
     fontSize: 18,

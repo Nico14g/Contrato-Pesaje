@@ -29,7 +29,7 @@ export default function Navigation() {
   }, []);
 
   if (user) {
-    if (user.rol === "admin" || user.rol === "company") {
+    if (user?.rol === "admin" || user?.rol === "company") {
       return (
         <NavigationContainer>
           <Tab.Navigator
@@ -52,7 +52,7 @@ export default function Navigation() {
             />
             <Tab.Screen
               name="Pesaje"
-              children={() => <PesajeStack setUser={setUser} />}
+              children={() => <PesajeStack user={user} setUser={setUser} />}
               options={{
                 title: "Pesaje",
               }}
@@ -76,7 +76,7 @@ export default function Navigation() {
           >
             <Tab.Screen
               name="Pesaje"
-              children={() => <PesajeStack user={user} />}
+              children={() => <PesajeStack user={user} setUser={setUser} />}
               options={{
                 title: "Pesaje",
               }}

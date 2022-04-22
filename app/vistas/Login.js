@@ -39,9 +39,11 @@ export default function Login() {
   };
 
   const loguear = () => {
-    signInWithEmailAndPassword(auth, email.value, password.value).then(() =>
-      setCargando(false)
-    );
+    signInWithEmailAndPassword(auth, email.value, password.value)
+      .then(() => setCargando(false))
+      .catch((e) => {
+        console.log(e);
+      });
   };
   return (
     <Card style={styles.row}>

@@ -1,7 +1,12 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, CACHE_SIZE_UNLIMITED } from "firebase/firestore";
+import {
+  initializeFirestore,
+  FirestoreSettings,
+  CACHE_SIZE_UNLIMITED,
+} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
+import { Settings } from "react-native";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAHokW9uQo6JUTACyeN7YlDH-UWrTRR58Q",
@@ -14,6 +19,10 @@ const firebaseConfig = {
 };
 
 export const firebase = initializeApp(firebaseConfig);
+
 export const auth = getAuth(firebase);
-export const db = getFirestore();
+export const db = initializeFirestore(firebase, {
+  experimentalForceLongPolling: true, // this line
+  useFetchStreams: false, // and this line
+});
 export const storage = getStorage();

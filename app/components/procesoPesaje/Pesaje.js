@@ -1,29 +1,46 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, StyleSheet, Dimensions } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  ScrollView,
+  FlatList,
+} from "react-native";
 import { Icon, Button, Text, Divider } from "react-native-elements";
 import { Title } from "react-native-paper";
 import { useFormik } from "formik";
 import Autocomplete from "react-native-autocomplete-input";
 import FormularioTemporero from "./FormularioTemporero";
 import NfcScan from "./nfc/NfcScan";
+import { db } from "../../api/firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import FormularioPesaje from "./FormularioPesaje";
+import LecturaNFC from "./nfc/LecturaNFC";
 
 export default function Pesaje(props) {
   const { setIndex, user } = props;
   const componentMounted = useRef(true);
-  const [bandeja, setBandeja] = useState({
-    nombre: "",
-    id: "",
-    dcto: 0,
-    cuid: user.rol === "company" ? user.uid : user.cuid,
-  });
+  const [bandejas, setBandejas] = useState([]);
+  const [mostrarLecturaNFC, setMostrarLecturaNFC] = useState(false);
+
   useEffect(() => {
     if (componentMounted.current) {
-      console.log("hola");
+      const cuid = user.rol === "bandeja" ? user.uid : user.cuid;
+      const q = query(collection(db, "bandeja"), where("cuid", "==", cuid));
+      onSnapshot(q, (querySnapshot) => {
+        let bandejas = [];
+        querySnapshot.forEach((doc) => {
+          if (doc.data().run !== user.run) {
+            bandejas.push(doc.data());
+          }
+        });
+        setBandejas(bandejas);
+      });
     }
     return () => {
       componentMounted.current = false;
     };
-  }, []);
+  }, [user.uid, user.cuid, user.rol, user.run]);
 
   const formik = useFormik({
     initialValues: {
@@ -33,8 +50,8 @@ export default function Pesaje(props) {
       id: "",
       dcto: 0,
       cuid: "",
-      weight: 0,
-      originalWeight: 0,
+      weight: "",
+      originalWeight: "",
     },
   });
 
@@ -42,61 +59,77 @@ export default function Pesaje(props) {
 
   return (
     <>
-      <View style={styles.container}>
-        <View style={styles.item}>
-          <Text h4>Pesaje de fruta</Text>
-        </View>
-      </View>
-      <Divider
-        inset={true}
-        insetType={"middle"}
-        color={"blue"}
-        style={{ alignItems: "center" }}
-      >
-        <Title>Información del Empleado</Title>
-      </Divider>
-      <View style={styles.containerButtons}>
-        <Button
-          onPress={() => console.log("hola")}
-          buttonStyle={styles.boton}
-          icon={
-            <Icon
-              type="material-community"
-              name="nfc"
-              size={20}
-              color="white"
-            />
-          }
-          titleStyle={{ fontSize: 14 }}
-          title=" Enlazar Temporero"
-        />
+      <FlatList
+        // other FlatList props
+        keyboardShouldPersistTaps="always"
+        data={[]}
+        ListFooterComponent={
+          <>
+            <View style={styles.container}>
+              <View style={styles.item}>
+                <Text h4>Pesaje de fruta</Text>
+              </View>
+            </View>
+            <Divider
+              inset={true}
+              insetType={"middle"}
+              color={"blue"}
+              style={{ alignItems: "center" }}
+            >
+              <Title>Información del Empleado</Title>
+            </Divider>
+            <View style={styles.containerButtons}>
+              <Button
+                onPress={() => console.log("hola")}
+                buttonStyle={styles.boton}
+                icon={
+                  <Icon
+                    type="material-community"
+                    name="nfc"
+                    size={20}
+                    color="white"
+                  />
+                }
+                titleStyle={{ fontSize: 14 }}
+                title=" Enlazar Temporero"
+              />
 
-        <Button
-          onPress={() => console.log("hola")}
-          buttonStyle={styles.boton}
-          icon={
-            <Icon
-              type="material-community"
-              name="cellphone-nfc"
-              size={20}
-              color="white"
-            />
-          }
-          titleStyle={{ fontSize: 14 }}
-          title=" Leer NFC"
+              <Button
+                onPress={() => setMostrarLecturaNFC(true)}
+                buttonStyle={styles.boton}
+                icon={
+                  <Icon
+                    type="material-community"
+                    name="cellphone-nfc"
+                    size={20}
+                    color="white"
+                  />
+                }
+                titleStyle={{ fontSize: 14 }}
+                title=" Leer NFC"
+              />
+            </View>
+            <FormularioTemporero formik={formik} />
+            <Divider
+              inset={true}
+              insetType={"middle"}
+              color={"blue"}
+              style={{ alignItems: "center" }}
+            >
+              <Title>Información del Pesaje</Title>
+            </Divider>
+            <FormularioPesaje formik={formik} bandejas={bandejas} />
+            {/* <NfcScan /> */}
+          </>
+        }
+      />
+      {mostrarLecturaNFC && (
+        <LecturaNFC
+          mostrarLecturaNFC={mostrarLecturaNFC}
+          setMostrarLecturaNFC={setMostrarLecturaNFC}
+          formik={formik}
         />
-      </View>
-      <FormularioTemporero formik={formik} />
-      <Divider
-        inset={true}
-        insetType={"middle"}
-        color={"blue"}
-        style={{ alignItems: "center" }}
-      >
-        <Title>Información del Pesaje</Title>
-      </Divider>
-
-      <NfcScan />
+      )}
     </>
   );
 }

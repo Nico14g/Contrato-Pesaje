@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { StyleSheet } from "react-native";
 import { Input, Icon, Button } from "react-native-elements";
 import { FormikProvider } from "formik";
+import { validateRut, formatRut } from "@fdograph/rut-utilities";
 
 export default function FormularioTemporero(props) {
   const { formik } = props;
   const [validateRutEmpleado, setValidateRutEmpleado] = useState(false);
 
-  const { handleBlur, getFieldProps, setValues, values } = formik;
+  const { handleBlur, getFieldProps, setFieldValue, setValues, values } =
+    formik;
 
   const actualizarEstado = (e, key) => {
     setValues({ ...values, [key]: e });
@@ -32,13 +34,13 @@ export default function FormularioTemporero(props) {
         style={styles.input}
         placeholderTextColor="gray"
         placeholder="Rut"
-        onChangeText={(e) => actualizarEstado(e, "rut")}
+        onChangeText={(e) => actualizarEstado(e, "run")}
         onBlur={() => {
-          setValidateRutEmpleado(!validateRut(getFieldProps("rut").value));
-          setFieldValue("rut", formatRut(getFieldProps("rut").value));
+          setValidateRutEmpleado(!validateRut(getFieldProps("run").value));
+          setFieldValue("run", formatRut(getFieldProps("run").value));
         }}
         errorMessage={validateRutEmpleado && "Rut no válido"}
-        value={values.rut}
+        value={values.run}
       />
     </FormikProvider>
   );

@@ -5,7 +5,6 @@ import { Snackbar } from "react-native-paper";
 
 export const SnackBar = (props) => {
   const { open, setOpen, message } = props;
-
   return (
     <View style={styles.container}>
       <Snackbar

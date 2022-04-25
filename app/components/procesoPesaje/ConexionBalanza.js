@@ -1,80 +1,89 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, Dimensions, Text, View } from "react-native";
 import { TextInput } from "react-native-paper";
 import Autocomplete from "react-native-autocomplete-input";
 import { Input, Icon, Button } from "react-native-elements";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { FormikProvider } from "formik";
+import { FormikProvider, useFormik } from "formik";
 import { Picker } from "@react-native-picker/picker";
+import RNBluetoothClassic from "react-native-bluetooth-classic";
+import { request, PERMISSIONS } from "react-native-permissions";
 
-export default function FormularioPesaje(props) {
-  const { formik, bandejas } = props;
-  const [selectedBandeja, setSelectedBandeja] = useState();
-  const [isSelected, setIsSelected] = useState(true);
-  const { setValues, values } = formik;
+export default function ConexionBalanza(props) {
+  const { permiso } = props;
+  const componentMounted = useRef(true);
+  const [devices, setDevices] = useState([]);
+  const [pairedDevices, setPairedDevices] = useState([]);
+  const [selectedDevice, setSelectedDevice] = useState("");
 
-  const handleValueChange = (itemValue) => {
-    setSelectedBandeja(itemValue);
-    if (itemValue !== "") {
-      const bandeja = bandejas.find((bandeja) => bandeja.id === itemValue);
-      setValues({ ...values, ...bandeja });
-      setIsSelected(false);
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      id: "",
+    },
+  });
+  const { values, setValues } = formik;
+
+  const getDeviceName = () => {
+    console.log(permiso, "permiso");
+    if (permiso) {
+      request(PERMISSIONS.ANDROID.BLUETOOTH_CONNECT).then(async (result) => {
+        if (result === "granted") {
+          Promise.resolve(RNBluetoothClassic.getBondedDevices()).then(
+            (paired) => {
+              setPairedDevices(paired);
+              if (paired.length > 0) {
+                setSelectedDevice(paired[0].id);
+                values.name = paired[0].name;
+                values.id = paired[0].id;
+              } else {
+                values.name = "";
+                values.id = "";
+              }
+            }
+          );
+        }
+      });
+    } else {
+      values.name = "";
+      values.id = "";
     }
   };
 
-  const actualizarEstado = (e, key) => {
-    setValues({ ...values, [key]: e });
+  useEffect(() => {
+    getDeviceName();
+  }, []);
+
+  const handleValueChange = (itemValue) => {
+    setSelectedDevice(itemValue);
+    if (itemValue !== "") {
+      const device = pairedDevices.find((device) => device.id === itemValue);
+      values.name = device.name;
+      values.id = device.id;
+    } else {
+      values.name = "";
+      values.id = "";
+    }
   };
 
   return (
     <FormikProvider value={formik}>
       <View style={styles.viewPicker}>
         <Picker
-          selectedValue={selectedBandeja}
+          selectedValue={selectedDevice}
           onValueChange={(itemValue, itemIndex) => handleValueChange(itemValue)}
-          placeholder="Seleccione un Tipo de Bandeja"
+          placeholder="Seleccione un Dispositivo Bluetooth"
           mode="dropdown"
           style={styles.pickerContainer}
         >
-          {isSelected && (
-            <Picker.Item label="Seleccione un Tipo de Bandeja" value="" />
-          )}
-          {bandejas.map((bandeja) => (
+          {pairedDevices.map((device) => (
             <Picker.Item
-              key={bandeja.id}
-              label={bandeja.nombre}
-              value={bandeja.id}
+              key={device.id}
+              label={device.name}
+              value={device.id}
             />
           ))}
         </Picker>
-      </View>
-
-      <View style={styles.containerTextFields}>
-        <TextInput
-          mode="outlined"
-          style={styles.textInput}
-          outlineColor="lightgrey"
-          placeholder="Peso Bruto"
-          onChangeText={(e) => actualizarEstado(e, "originalWeight")}
-          keyboardType="numeric"
-          value={values.originalWeight.toString()}
-          activeOutlineColor="lightgrey"
-          right={<TextInput.Affix text="KG" />}
-        />
-        <View>
-          <Icon name="arrow-right" type="material-community" />
-        </View>
-        <TextInput
-          mode="outlined"
-          style={styles.textInput}
-          outlineColor="lightgrey"
-          activeOutlineColor="lightgrey"
-          placeholder="Peso Neto"
-          onChangeText={(e) => actualizarEstado(e, "weight")}
-          keyboardType="numeric"
-          value={values.weight.toString()}
-          right={<TextInput.Affix text="KG" />}
-        />
       </View>
     </FormikProvider>
   );
@@ -118,6 +127,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignSelf: "center",
     alignItems: "center",
+    marginBottom: 10,
   },
   container: {
     left: 0,

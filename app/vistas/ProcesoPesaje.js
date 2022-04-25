@@ -23,9 +23,9 @@ export default function ProcesoPesaje(props) {
   const renderScene = ({ route }) => {
     switch (route.key) {
       case "categoria":
-        return <Categoria setIndex={setIndex} user={user} />;
+        return <Categoria index={index} setIndex={setIndex} user={user} />;
       case "pesaje":
-        return <Pesaje setIndex={setIndex} user={user} />;
+        return <Pesaje index={index} setIndex={setIndex} user={user} />;
       default:
         return null;
     }

@@ -69,8 +69,15 @@ export default function ModalCategoria(props) {
     <Provider>
       <View>
         <Portal>
-          <Dialog visible={open} onDismiss={hideDialog}>
-            <Dialog.Title> Datos de la Nueva Categoría</Dialog.Title>
+          <Dialog
+            visible={open}
+            onDismiss={hideDialog}
+            style={{ backgroundColor: "#f2f2f2" }}
+          >
+            <Dialog.Title style={{ alignSelf: "center", color: "black" }}>
+              {" "}
+              Datos de la Nueva Categoría
+            </Dialog.Title>
             <FormikProvider value={formik}>
               <Dialog.Content>
                 <FormularioCategoria
@@ -80,6 +87,9 @@ export default function ModalCategoria(props) {
                 />
               </Dialog.Content>
               <Dialog.Actions>
+                <Button onPress={hideDialog} color="#2f3bc7">
+                  Cancelar
+                </Button>
                 <Button onPress={handleSubmit} color="#2f3bc7">
                   Guardar
                 </Button>

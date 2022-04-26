@@ -24,6 +24,14 @@ export default function FormularioPesaje(props) {
 
   const actualizarEstado = (e, key) => {
     setValues({ ...values, [key]: e });
+    if (key === "originalWeight") {
+      console.log(selectedBandeja);
+      values.originalWeight = e;
+      setValues({
+        ...values,
+        weight: parseFloat(e) - values.dcto,
+      });
+    }
   };
 
   return (

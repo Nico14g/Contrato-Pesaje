@@ -187,19 +187,19 @@ export default function Pesaje(props) {
 
   const formik = useFormik({
     initialValues: {
-      name: "Nicolás González",
-      run: "20.035.230-0",
+      name: "",
+      run: "",
       nombre: "bandeja 1.0 kg",
       id: "tk4lD384ZusDfSujkfv9",
       dcto: 1,
       cuid: "2TtPZcIEcnQLeLbiXmDf646QJcx1",
-      weight: "1",
-      originalWeight: "2",
+      weight: "",
+      originalWeight: "",
     },
   });
 
   const { values } = formik;
-
+  console.log(values);
   const obtenerRegistros = (categoriaSelected) => {
     const peso = isNaN(parseFloat(values.weight))
       ? 0
@@ -262,6 +262,8 @@ export default function Pesaje(props) {
       weight: values.weight,
     };
     await addDoc(collectionWR, data);
+    setMessage("Información Guardada");
+    setOpenSnackbar(true);
   };
   return (
     <>
@@ -285,7 +287,7 @@ export default function Pesaje(props) {
               <Title>Información del Empleado</Title>
             </Divider>
             <View style={styles.containerButtons}>
-              <Button
+              {/* <Button
                 onPress={() => setMostrarEnlaceNFC(true)}
                 buttonStyle={styles.boton}
                 icon={
@@ -298,7 +300,7 @@ export default function Pesaje(props) {
                 }
                 titleStyle={{ fontSize: 14 }}
                 title=" Enlazar Temporero"
-              />
+              /> */}
 
               <Button
                 onPress={() => setMostrarLecturaNFC(true)}
@@ -350,6 +352,8 @@ export default function Pesaje(props) {
           mostrarLecturaNFC={mostrarLecturaNFC}
           setMostrarLecturaNFC={setMostrarLecturaNFC}
           formik={formik}
+          setOpenSnackbar={setOpenSnackbar}
+          setMessage={setMessage}
         />
       )}
       {mostrarEnlaceNFC && (
@@ -387,6 +391,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignSelf: "center",
     alignItems: "center",
+    marginTop: 10,
     marginBottom: 10,
   },
 

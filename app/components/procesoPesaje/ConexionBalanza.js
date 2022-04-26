@@ -52,7 +52,7 @@ export default function ConexionBalanza(props) {
 
   useEffect(() => {
     getDeviceName();
-  }, []);
+  }, [permiso]);
 
   const handleValueChange = (itemValue) => {
     setSelectedDevice(itemValue);

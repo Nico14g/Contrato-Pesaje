@@ -32,6 +32,7 @@ import { SnackBar } from "../../utilidades/Snackbar";
 import { BleManager } from "react-native-ble-plx";
 import RNBluetoothClassic from "react-native-bluetooth-classic";
 import ConexionBalanza from "./ConexionBalanza";
+import { validateRut, formatRut, RutFormat } from "@fdograph/rut-utilities";
 
 export default function Pesaje(props) {
   const { index, setIndex, user } = props;
@@ -44,6 +45,8 @@ export default function Pesaje(props) {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [message, setMessage] = useState("");
   const [permiso, setPermiso] = useState(false);
+  const [errorPeso, setErrorPeso] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [device, setDevice] = useState(null);
   const manager = new BleManager();
 
@@ -57,7 +60,7 @@ export default function Pesaje(props) {
 
   useEffect(() => {
     if (componentMounted.current) {
-      const cuid = user.rol === "bandeja" ? user.uid : user.cuid;
+      const cuid = user.rol === "company" ? user.uid : user.cuid;
       const q = query(collection(db, "bandeja"), where("cuid", "==", cuid));
       onSnapshot(q, (querySnapshot) => {
         let bandejas = [];
@@ -199,7 +202,7 @@ export default function Pesaje(props) {
   });
 
   const { values } = formik;
-  console.log(values);
+
   const obtenerRegistros = (categoriaSelected) => {
     const peso = isNaN(parseFloat(values.weight))
       ? 0
@@ -211,6 +214,7 @@ export default function Pesaje(props) {
       id: values.run,
       lastDate: new Date(),
     };
+    console.log(categoriaSelected.item.registers, "estos son los registros");
     if (categoriaSelected.item.registers.length > 0) {
       //cambiar mi rut
       const registro = categoriaSelected.item.registers.find(
@@ -224,6 +228,9 @@ export default function Pesaje(props) {
           id: values.run,
           lastDate: new Date(),
         };
+        const index = categoriaSelected.item.registers.indexOf(registro);
+        categoriaSelected.item.registers[index].acumulate =
+          registro.acumulate + peso;
 
         return nuevoRegistro;
       } else {
@@ -233,38 +240,71 @@ export default function Pesaje(props) {
       return vacio;
     }
   };
-  const pruebaGuardado = async () => {
-    console.log(categoriaSelected);
-    const registro = obtenerRegistros(categoriaSelected);
-    console.log(registro);
-    const docRef = doc(
-      db,
-      "category",
-      categoriaSelected.item.id,
-      "registers",
-      values.run
-    );
 
-    await setDoc(docRef, registro).then((a) => console.log(a));
-    const collectionWR = collection(
-      db,
-      "category",
-      categoriaSelected.item.id,
-      "registers",
-      values.run,
-      "workerRegisters"
+  const validacionUsuario = () => {
+    const isTemporero = temporeros.find(
+      (temporero) =>
+        temporero.run === formatRut(values.run, RutFormat.DOTS_DASH)
     );
-
-    const data = {
-      category: categoriaSelected.item.id,
-      date: new Date(),
-      originalWeight: values.originalWeight,
-      weight: values.weight,
-    };
-    await addDoc(collectionWR, data);
-    setMessage("Información Guardada");
-    setOpenSnackbar(true);
+    if (isTemporero !== undefined) return true;
+    return false;
   };
+
+  const guardar = async () => {
+    setLoading(true);
+    if (values.name !== "" && values.run !== "" && values.weight !== "") {
+      if (!validateRut(values.run) || errorPeso) {
+        if (errorPeso) {
+          setMessage("Peso no válido");
+        } else {
+          setMessage("Rut no válido");
+        }
+        setLoading(false);
+        setOpenSnackbar(true);
+      } else {
+        if (!validacionUsuario()) {
+          setLoading(false);
+          setMessage("Temporero no Registrado");
+          setOpenSnackbar(true);
+        } else {
+          const registro = obtenerRegistros(categoriaSelected);
+          const docRef = doc(
+            db,
+            "category",
+            categoriaSelected.item.id,
+            "registers",
+            values.run
+          );
+
+          await setDoc(docRef, registro).then((a) => console.log(a));
+          const collectionWR = collection(
+            db,
+            "category",
+            categoriaSelected.item.id,
+            "registers",
+            values.run,
+            "workerRegisters"
+          );
+
+          const data = {
+            category: categoriaSelected.item.id,
+            date: new Date(),
+            originalWeight: values.originalWeight,
+            weight: values.weight,
+          };
+          await addDoc(collectionWR, data);
+          setLoading(false);
+          setMessage("Información Guardada");
+          setOpenSnackbar(true);
+        }
+      }
+    } else {
+      setLoading(false);
+      setMessage("Falta información por completar");
+      setOpenSnackbar(true);
+    }
+  };
+
   return (
     <>
       <FlatList
@@ -326,11 +366,16 @@ export default function Pesaje(props) {
             >
               <Title>Información del Pesaje</Title>
             </Divider>
-            <FormularioPesaje formik={formik} bandejas={bandejas} />
+            <FormularioPesaje
+              formik={formik}
+              bandejas={bandejas}
+              errorPeso={errorPeso}
+              setErrorPeso={setErrorPeso}
+            />
             <ConexionBalanza permiso={permiso} />
             <View style={{ alignItems: "center", marginTop: 10 }}>
               <Button
-                onPress={() => pruebaGuardado()}
+                onPress={() => (loading ? null : guardar())}
                 buttonStyle={styles.boton}
                 icon={
                   <Icon
@@ -342,6 +387,7 @@ export default function Pesaje(props) {
                 }
                 titleStyle={{ fontSize: 14 }}
                 title=" Guardar"
+                loading={loading}
               />
             </View>
           </>

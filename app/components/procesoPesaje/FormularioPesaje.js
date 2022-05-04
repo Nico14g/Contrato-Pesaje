@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { StyleSheet, Dimensions, Text, View } from "react-native";
-import { TextInput } from "react-native-paper";
+import { TextInput, Paragraph } from "react-native-paper";
 import Autocomplete from "react-native-autocomplete-input";
 import { Input, Icon, Button } from "react-native-elements";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -8,7 +8,7 @@ import { FormikProvider } from "formik";
 import { Picker } from "@react-native-picker/picker";
 
 export default function FormularioPesaje(props) {
-  const { formik, bandejas } = props;
+  const { formik, bandejas, errorPeso, setErrorPeso } = props;
   const [selectedBandeja, setSelectedBandeja] = useState();
   const [isSelected, setIsSelected] = useState(true);
   const { setValues, values } = formik;
@@ -23,14 +23,23 @@ export default function FormularioPesaje(props) {
   };
 
   const actualizarEstado = (e, key) => {
-    setValues({ ...values, [key]: e });
+    const str = e.replace(",", ".");
+    setValues({ ...values, [key]: str });
     if (key === "originalWeight") {
-      console.log(selectedBandeja);
-      values.originalWeight = e;
-      setValues({
-        ...values,
-        weight: parseFloat(e) - values.dcto,
-      });
+      const valor = /^(?:[1-9]\d*|0)?(?:\.\d+)?$/gm.test(str);
+      setErrorPeso(!valor);
+      values.originalWeight = str;
+      if (valor && str !== "") {
+        setValues({
+          ...values,
+          weight: parseFloat(str) - values.dcto,
+        });
+      } else {
+        setValues({
+          ...values,
+          weight: "",
+        });
+      }
     }
   };
 
@@ -64,7 +73,7 @@ export default function FormularioPesaje(props) {
           outlineColor="lightgrey"
           placeholder="Peso Bruto"
           onChangeText={(e) => actualizarEstado(e, "originalWeight")}
-          keyboardType="numeric"
+          keyboardType="number-pad"
           value={values.originalWeight.toString()}
           activeOutlineColor="lightgrey"
           right={<TextInput.Affix text="KG" />}
@@ -78,12 +87,16 @@ export default function FormularioPesaje(props) {
           outlineColor="lightgrey"
           activeOutlineColor="lightgrey"
           placeholder="Peso Neto"
-          onChangeText={(e) => actualizarEstado(e, "weight")}
           keyboardType="numeric"
           value={values.weight.toString()}
           right={<TextInput.Affix text="KG" />}
         />
       </View>
+      {errorPeso && (
+        <Paragraph style={{ left: "7%", color: "#d32f2f" }}>
+          Peso ingresado no válido
+        </Paragraph>
+      )}
     </FormikProvider>
   );
 }

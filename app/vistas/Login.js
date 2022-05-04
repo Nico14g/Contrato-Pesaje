@@ -9,6 +9,8 @@ export default function Login() {
   const [email, setEmail] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
   const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState(false);
+
   const [show, setShow] = useState(false);
 
   function passwordValidator(password) {
@@ -39,10 +41,12 @@ export default function Login() {
   };
 
   const loguear = () => {
+    setError(false);
     signInWithEmailAndPassword(auth, email.value, password.value)
       .then(() => setCargando(false))
       .catch((e) => {
-        console.log(e);
+        setCargando(false);
+        setError(true);
       });
   };
   return (
@@ -102,6 +106,11 @@ export default function Login() {
         {!!password.error && (
           <Paragraph style={{ left: 2, color: "#d32f2f" }}>
             {password.error}
+          </Paragraph>
+        )}
+        {error && (
+          <Paragraph style={{ left: 2, color: "#d32f2f" }}>
+            Correo o contraseña incorrecta
           </Paragraph>
         )}
 

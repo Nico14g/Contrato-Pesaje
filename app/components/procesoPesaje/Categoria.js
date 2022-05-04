@@ -16,48 +16,55 @@ export default function Categoria(props) {
   const [categorias, setCategorias] = useState([]);
   const [open, setOpen] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [registros, setRegistros] = useState([]);
+  const [workerRegisters, setWorkerRegisters] = useState([]);
   const [message, setMessage] = useState("");
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setCargado(false);
-    if (componentMounted.current) {
-      const cuid = user.rol === "company" ? user.uid : user.cuid;
+    const cuid = user.rol === "company" ? user.uid : user.cuid;
+    const q = query(collection(db, "category"), where("cuid", "==", cuid));
+    let categorias = [];
+    let registros = [];
+    onSnapshot(q, (querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        let registers = [];
 
-      const q = query(collection(db, "category"), where("cuid", "==", cuid));
+        onSnapshot(collection(doc.ref, "registers"), (querySnapshot2) => {
+          querySnapshot2.forEach((doc2) => {
+            let workerRegisters = [];
 
-      onSnapshot(q, (querySnapshot) => {
-        let categorias = [];
-
-        querySnapshot.forEach((doc) => {
-          let registers = [];
-          onSnapshot(collection(doc.ref, "registers"), (querySnapshot2) => {
-            querySnapshot2.forEach((doc2) => {
-              let workerRegisters = [];
-
-              onSnapshot(
-                collection(doc2.ref, "workerRegisters"),
-                (querySnapshot3) => {
-                  querySnapshot3.forEach((doc3) => {
-                    workerRegisters.push(doc3.data());
-                  });
-                  registers.push(
-                    Object.assign(doc2.data(), { workerRegisters })
-                  );
-                }
-              );
-            });
+            onSnapshot(
+              collection(doc2.ref, "workerRegisters"),
+              (querySnapshot3) => {
+                querySnapshot3.forEach((doc3) => {
+                  workerRegisters.push(doc3.data());
+                });
+                registers.push({
+                  ...doc2.data(),
+                  workerRegisters: workerRegisters,
+                });
+                setWorkerRegisters((a) => [...a, workerRegisters]);
+              }
+            );
           });
-          categorias.push(Object.assign(doc.data(), { registers }));
         });
-        setCategorias(categorias);
+        categorias.push({ ...doc.data(), registers: registers });
+        registros.push(registers);
       });
-      setCargado(true);
-    }
-    return () => {
-      componentMounted.current = false;
-    };
-  }, []);
 
+      if (componentMounted.current) {
+        setRegistros(registros);
+        setCategorias(categorias);
+      }
+    });
+  }, [user.uid, user.cuid, user.rol, user.run]);
+
+  useEffect(() => {
+    if (categorias.length > 0 && registros.length > 0) {
+      setLoaded(true);
+    }
+  }, [categorias, registros, workerRegisters]);
   return (
     <>
       <View style={styles.container}>
@@ -90,16 +97,18 @@ export default function Categoria(props) {
         value={search}
       />
 
-      <ListaCategorias
-        categorias={
-          search === ""
-            ? categorias
-            : categorias.filter((categoria) =>
-                categoria.name.toLowerCase().includes(search.toLowerCase())
-              )
-        }
-        setIndex={setIndex}
-      ></ListaCategorias>
+      {loaded && (
+        <ListaCategorias
+          categorias={
+            search === ""
+              ? categorias
+              : categorias.filter((categoria) =>
+                  categoria.name.toLowerCase().includes(search.toLowerCase())
+                )
+          }
+          setIndex={setIndex}
+        ></ListaCategorias>
+      )}
       {open && (
         <ModalCategoria
           open={open}

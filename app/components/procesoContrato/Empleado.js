@@ -3,6 +3,7 @@ import { FormularioEmpleado } from "../formularios/FormularioEmpleado";
 import { TituloSwitch } from "./TituloSwitch";
 import { db } from "../../api/firebase";
 import { collection, getDocs } from "firebase/firestore";
+import firestore from "@react-native-firebase/firestore";
 
 export default function Empleado(props) {
   const { setIndex } = props;
@@ -32,11 +33,19 @@ export default function Empleado(props) {
 
   async function consulta() {
     let data = [];
-    const querySnapshot = await getDocs(collection(db, "Empleados"));
-    querySnapshot.forEach((doc) => {
-      data.push(doc.data());
-    });
-    setEmpleados(data);
+    firestore()
+      .collection("Empleados")
+      .onSnapshot((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          data.push(doc.data());
+        });
+        setEmpleados(data);
+      });
+    // const querySnapshot = await getDocs(collection(db, "Empleados"));
+    // querySnapshot.forEach((doc) => {
+    //   data.push(doc.data());
+    // });
+    // setEmpleados(data);
   }
   return (
     <>

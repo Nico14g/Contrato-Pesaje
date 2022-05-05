@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import { Icon, Button, Text, SearchBar } from "react-native-elements";
-
-import { db } from "../../api/firebase";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import firestore from "@react-native-firebase/firestore";
 import ListaCategorias from "../categoria/ListaCategorias";
 import ModalCategoria from "../../components/categoria/ModalCategoria";
 import { SnackBar } from "../../utilidades/Snackbar";
@@ -23,42 +21,90 @@ export default function Categoria(props) {
 
   useEffect(() => {
     const cuid = user.rol === "company" ? user.uid : user.cuid;
-    const q = query(collection(db, "category"), where("cuid", "==", cuid));
-    let categorias = [];
-    let registros = [];
-    onSnapshot(q, (querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        let registers = [];
+    firestore()
+      .collection("category")
+      .where("cuid", "==", cuid)
+      .onSnapshot((querySnapshot) => {
+        let categorias = [];
+        let registros = [];
+        querySnapshot.forEach((doc) => {
+          let registers = [];
+          firestore()
+            .collection("category/" + doc.id + "/registers")
+            .onSnapshot((querySnapshot2) => {
+              querySnapshot2.forEach((doc2) => {
+                let workerRegisters = [];
+                firestore()
+                  .collection(
+                    "category/" +
+                      doc.id +
+                      "/registers/" +
+                      doc2.id +
+                      "/workerRegisters"
+                  )
+                  .onSnapshot((querySnapshot3) => {
+                    querySnapshot3.forEach((doc3) => {
+                      workerRegisters.push(doc3.data());
+                    });
+                    registers.push({
+                      ...doc2.data(),
+                      workerRegisters: workerRegisters,
+                    });
+                    setWorkerRegisters((a) => [...a, workerRegisters]);
+                  });
+              });
+            });
 
-        onSnapshot(collection(doc.ref, "registers"), (querySnapshot2) => {
-          querySnapshot2.forEach((doc2) => {
-            let workerRegisters = [];
-
-            onSnapshot(
-              collection(doc2.ref, "workerRegisters"),
-              (querySnapshot3) => {
-                querySnapshot3.forEach((doc3) => {
-                  workerRegisters.push(doc3.data());
-                });
-                registers.push({
-                  ...doc2.data(),
-                  workerRegisters: workerRegisters,
-                });
-                setWorkerRegisters((a) => [...a, workerRegisters]);
-              }
-            );
-          });
+          categorias.push({ ...doc.data(), registers: registers });
+          registros.push(registers);
         });
-        categorias.push({ ...doc.data(), registers: registers });
-        registros.push(registers);
-      });
 
-      if (componentMounted.current) {
-        setRegistros(registros);
-        setCategorias(categorias);
-      }
-    });
+        if (componentMounted.current) {
+          console.log(categorias.length, "largo");
+          setRegistros(registros);
+          setCategorias(categorias);
+        }
+      });
   }, [user.uid, user.cuid, user.rol, user.run]);
+
+  // useEffect(() => {
+  //   const cuid = user.rol === "company" ? user.uid : user.cuid;
+  //   const q = query(collection(db, "category"), where("cuid", "==", cuid));
+  //   let categorias = [];
+  //   let registros = [];
+  //   onSnapshot(q, (querySnapshot) => {
+  //     querySnapshot.forEach((doc) => {
+  //       let registers = [];
+
+  //       onSnapshot(collection(doc.ref, "registers"), (querySnapshot2) => {
+  //         querySnapshot2.forEach((doc2) => {
+  //           let workerRegisters = [];
+
+  //           onSnapshot(
+  //             collection(doc2.ref, "workerRegisters"),
+  //             (querySnapshot3) => {
+  //               querySnapshot3.forEach((doc3) => {
+  //                 workerRegisters.push(doc3.data());
+  //               });
+  //               registers.push({
+  //                 ...doc2.data(),
+  //                 workerRegisters: workerRegisters,
+  //               });
+  //               setWorkerRegisters((a) => [...a, workerRegisters]);
+  //             }
+  //           );
+  //         });
+  //       });
+  //       categorias.push({ ...doc.data(), registers: registers });
+  //       registros.push(registers);
+  //     });
+
+  //     if (componentMounted.current) {
+  //       setRegistros(registros);
+  //       setCategorias(categorias);
+  //     }
+  //   });
+  // }, [user.uid, user.cuid, user.rol, user.run]);
 
   useEffect(() => {
     if (categorias.length > 0 && registros.length > 0) {

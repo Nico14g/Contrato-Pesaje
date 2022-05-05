@@ -8,6 +8,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { FormularioAutocompleteEmpresa } from "./FormularioAutocompleteEmpresa";
 import { storeData } from "../../utilidades/variablesGlobales";
 import { useKeyboard } from "@react-native-community/hooks";
+import firestore from "@react-native-firebase/firestore";
 
 export const FormularioEmpresa = (props) => {
   const { isEnabled, empresas, setEmpresas, setIndex } = props;
@@ -31,17 +32,21 @@ export const FormularioEmpresa = (props) => {
     setIsPressed(true);
     setIsValid(validarEntradas());
     if (validarEntradas() && !validateRutRazon && !validateRutRepresentante) {
-      //almacenarDatosBD();
+      almacenarDatosBD();
       storeData(empresa, "@datosEmpresa");
       setIndex(2);
     }
   };
 
   const almacenarDatosBD = async () => {
-    await setDoc(
-      doc(db, "Empresa", getFieldProps("rutRazonSocial").value),
-      values
-    );
+    await firestore()
+      .collection("Empresa")
+      .doc(getFieldProps("rutRazonSocial").value)
+      .set(values);
+    // await setDoc(
+    //   doc(db, "Empresa", getFieldProps("rutRazonSocial").value),
+    //   values
+    // );
   };
 
   const validarEntradas = () => {

@@ -3,6 +3,7 @@ import { FormularioEmpresa } from "../formularios/FormularioEmpresa";
 import { TituloSwitch } from "./TituloSwitch";
 import { db } from "../../api/firebase";
 import { collection, getDocs } from "firebase/firestore";
+import firestore from "@react-native-firebase/firestore";
 
 export default function Empresa(props) {
   const { setIndex } = props;
@@ -16,31 +17,41 @@ export default function Empresa(props) {
     if (componentMounted.current) {
       let data = [];
       let id = [];
-      getDocs(collection(db, "Empresa")).then((documentos) => {
-        documentos.docs.forEach((doc) => {
-          data.push(doc.data());
-          id.push(doc.id);
+      firestore()
+        .collection("Empresa")
+        .onSnapshot((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            data.push(doc.data());
+            id.push(doc.id);
+          });
+          setEmpresas(data);
+          setIdEmpresas(id);
         });
-        setEmpresas(data);
-        setIdEmpresas(id);
-      });
+      // getDocs(collection(db, "Empresa")).then((documentos) => {
+      //   documentos.docs.forEach((doc) => {
+      //     data.push(doc.data());
+      //     id.push(doc.id);
+      //   });
+      //   setEmpresas(data);
+      //   setIdEmpresas(id);
+      // });
     }
     return () => {
       componentMounted.current = false;
     };
   }, []);
 
-  const consulta = async () => {
-    try {
-      let data = [];
-      getDocs(collection(db, "Empresa")).then((documentos) => {
-        documentos.docs.forEach((doc) => data.push(doc.data()));
-        setEmpresas(data);
-      });
-    } catch (e) {
-      console.log(e);
-    }
-  };
+  // const consulta = async () => {
+  //   try {
+  //     let data = [];
+  //     getDocs(collection(db, "Empresa")).then((documentos) => {
+  //       documentos.docs.forEach((doc) => data.push(doc.data()));
+  //       setEmpresas(data);
+  //     });
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // };
 
   /*let data = [];
       const querySnapshot = await getDocs(collection(db, "Empresa"));

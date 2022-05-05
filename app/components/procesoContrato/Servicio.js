@@ -3,6 +3,7 @@ import { FormularioServicio } from "../formularios/FormularioServicio";
 import { TituloSwitch } from "./TituloSwitch";
 import { db } from "../../api/firebase";
 import { collection, getDocs } from "firebase/firestore";
+import firestore from "@react-native-firebase/firestore";
 
 export default function Servicio(props) {
   const { setIndex } = props;
@@ -33,11 +34,15 @@ export default function Servicio(props) {
 
   async function consulta() {
     let data = [];
-    const querySnapshot = await getDocs(collection(db, "Servicios"));
-    querySnapshot.forEach((doc) => {
-      data.push(doc.data());
-    });
-    setServicios(data);
+    firestore()
+      .collection("Servicios")
+      .onSnapshot((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          data.push(doc.data());
+        });
+        setServicios(data);
+      });
+    //const querySnapshot = await getDocs(collection(db, "Servicios"));
   }
   return (
     <>

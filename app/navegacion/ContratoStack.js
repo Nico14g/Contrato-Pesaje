@@ -4,8 +4,8 @@ import { Icon } from "react-native-elements";
 import Contratos from "../vistas/Contratos";
 import TabProcesoContrato from "../vistas/TabProcesoContrato";
 import EdicionContrato from "../vistas/EdicionContrato";
-import { signOut } from "firebase/auth";
-import { auth } from "../api/firebase";
+
+import auth from "@react-native-firebase/auth";
 
 const Stack = createNativeStackNavigator();
 
@@ -31,7 +31,11 @@ export default function ContratoStack(props) {
               name="login-variant"
               size={25}
               color="white"
-              onPress={() => signOut(auth).then(() => setUser(null))}
+              onPress={() =>
+                auth()
+                  .signOut()
+                  .then(() => setUser(null))
+              }
             />
           ),
         }}

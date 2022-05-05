@@ -10,6 +10,7 @@ import { FormularioAutocompleteAnexos } from "./FormularioAutocompleteAnexos";
 import { useNavigation } from "@react-navigation/native";
 import { storeData } from "../../utilidades/variablesGlobales";
 import { useKeyboard } from "@react-native-community/hooks";
+import firestore from "@react-native-firebase/firestore";
 
 export const FormularioAnexos = (props) => {
   const { isEnabled, anexos, anexo, setAnexo } = props;
@@ -57,6 +58,7 @@ export const FormularioAnexos = (props) => {
       regimenSalud: selectedSalud,
     };
     storeData(data, "@datosAnexos");
+    await firestore().collection("Anexos").add(data);
     //const docRef = await addDoc(collection(db, "Anexos"), data);
   };
 

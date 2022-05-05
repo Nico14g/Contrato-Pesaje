@@ -3,13 +3,13 @@ import { View } from "react-native";
 import { useFormik, FormikProvider } from "formik";
 import { Button, Dialog, Portal, Provider } from "react-native-paper";
 import FormularioCategoria from "./FormularioCategoria";
-import { db } from "../../api/firebase";
-import { doc, setDoc, addDoc, collection } from "firebase/firestore";
+import firestore from "@react-native-firebase/firestore";
 
 export default function ModalCategoria(props) {
   const { open, setOpen, user, setOpenSnackbar, setMessage } = props;
   const [nombreValido, setNombreValido] = useState(true);
   const [fechaValida, setFechaValida] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -25,12 +25,14 @@ export default function ModalCategoria(props) {
   const hideDialog = () => setOpen(false);
 
   const error = () => {
+    setLoading(false);
     setMessage("Ha ocurrido un error.");
     setOpenSnackbar(true);
     setOpen(false);
   };
 
   const guardarDatos = async () => {
+    setLoading(true);
     if (values.name !== "" && values.dateStart !== "") {
       setNombreValido(true);
       setFechaValida(true);
@@ -40,11 +42,17 @@ export default function ModalCategoria(props) {
         cuid: user.rol === "company" ? user.uid : user.cuid,
         id: values.name,
       };
-      await addDoc(collection(db, "category"), data)
+      await firestore()
+        .collection("category")
+        .add(data)
         .then(async (e) => {
           const info = { ...data, id: e.id };
-          await setDoc(doc(db, "category", e.id), info)
+          await firestore()
+            .collection("category")
+            .doc(e.id)
+            .set(info)
             .then(() => {
+              setLoading(false);
               setMessage("Se ha guardado correctamente en la base de datos");
               setOpenSnackbar(true);
               setOpen(false);
@@ -57,6 +65,7 @@ export default function ModalCategoria(props) {
           error();
         });
     } else {
+      setLoading(false);
       if (values.name === "") {
         setNombreValido(false);
       }
@@ -90,7 +99,11 @@ export default function ModalCategoria(props) {
                 <Button onPress={hideDialog} color="#2f3bc7">
                   Cancelar
                 </Button>
-                <Button onPress={handleSubmit} color="#2f3bc7">
+                <Button
+                  loading={loading}
+                  onPress={handleSubmit}
+                  color="#2f3bc7"
+                >
                   Guardar
                 </Button>
               </Dialog.Actions>

@@ -15,6 +15,7 @@ import { useFormik } from "formik";
 import Autocomplete from "react-native-autocomplete-input";
 import FormularioTemporero from "./FormularioTemporero";
 import NfcScan from "./nfc/NfcScan";
+import firestore from "@react-native-firebase/firestore";
 import { db } from "../../api/firebase";
 import {
   collection,
@@ -61,16 +62,18 @@ export default function Pesaje(props) {
   useEffect(() => {
     if (componentMounted.current) {
       const cuid = user.rol === "company" ? user.uid : user.cuid;
-      const q = query(collection(db, "bandeja"), where("cuid", "==", cuid));
-      onSnapshot(q, (querySnapshot) => {
-        let bandejas = [];
-        querySnapshot.forEach((doc) => {
-          if (doc.data().run !== user.run) {
-            bandejas.push(doc.data());
-          }
+      firestore()
+        .collection("bandeja")
+        .where("cuid", "==", cuid)
+        .onSnapshot((querySnapshot) => {
+          let bandejas = [];
+          querySnapshot.forEach((doc) => {
+            if (doc.data().run !== user.run) {
+              bandejas.push(doc.data());
+            }
+          });
+          setBandejas(bandejas);
         });
-        setBandejas(bandejas);
-      });
     }
     return () => {
       componentMounted.current = false;
@@ -80,20 +83,23 @@ export default function Pesaje(props) {
   useEffect(() => {
     if (componentMounted.current) {
       const cuid = user.rol === "company" ? user.uid : user.cuid;
-      const q = query(collection(db, "users"), where("cuid", "==", cuid));
-      onSnapshot(q, (querySnapshot) => {
-        let temporeros = [];
-        querySnapshot.forEach((doc) => {
-          if (
-            doc.data().run !== user.run &&
-            doc.data().rol === "harvester" &&
-            doc.data().isenabled === true
-          ) {
-            temporeros.push(doc.data());
-          }
+      firestore()
+        .collection("users")
+        .where("cuid", "==", cuid)
+        .onSnapshot((querySnapshot) => {
+          let temporeros = [];
+          querySnapshot.forEach((doc) => {
+            if (
+              doc.data().run !== user.run &&
+              doc.data().rol === "harvester" &&
+              doc.data().isenabled === true
+            ) {
+              temporeros.push(doc.data());
+            }
+          });
+          console.log(temporeros, "estos son los temporeros");
+          setTemporeros(temporeros);
         });
-        setTemporeros(temporeros);
-      });
     }
     return () => {
       componentMounted.current = false;
@@ -214,13 +220,13 @@ export default function Pesaje(props) {
       id: values.run,
       lastDate: new Date(),
     };
-    console.log(categoriaSelected.item.registers, "estos son los registros");
     if (categoriaSelected.item.registers.length > 0) {
       //cambiar mi rut
       const registro = categoriaSelected.item.registers.find(
         (registers) => registers.id === values.run
       );
       if (registro) {
+        console.log(registro.acumulate, "esto está acumulado");
         const nuevoRegistro = {
           acumulate: registro.acumulate + peso,
           firstName: values.name.split(" ", 2)[0],
@@ -234,9 +240,11 @@ export default function Pesaje(props) {
 
         return nuevoRegistro;
       } else {
+        categoriaSelected.item.registers.push(vacio);
         return vacio;
       }
     } else {
+      categoriaSelected.item.registers.push(vacio);
       return vacio;
     }
   };
@@ -268,23 +276,11 @@ export default function Pesaje(props) {
           setOpenSnackbar(true);
         } else {
           const registro = obtenerRegistros(categoriaSelected);
-          const docRef = doc(
-            db,
-            "category",
-            categoriaSelected.item.id,
-            "registers",
-            values.run
-          );
 
-          await setDoc(docRef, registro).then((a) => console.log(a));
-          const collectionWR = collection(
-            db,
-            "category",
-            categoriaSelected.item.id,
-            "registers",
-            values.run,
-            "workerRegisters"
-          );
+          await firestore()
+            .collection("category/" + categoriaSelected.item.id + "/registers")
+            .doc(values.run)
+            .set(registro);
 
           const data = {
             category: categoriaSelected.item.id,
@@ -292,7 +288,16 @@ export default function Pesaje(props) {
             originalWeight: values.originalWeight,
             weight: values.weight,
           };
-          await addDoc(collectionWR, data);
+          await firestore()
+            .collection(
+              "category/" +
+                categoriaSelected.item.id +
+                "/registers/" +
+                values.run +
+                "/workerRegisters"
+            )
+            .add(data);
+
           setLoading(false);
           setMessage("Información Guardada");
           setOpenSnackbar(true);

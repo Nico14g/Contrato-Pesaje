@@ -2,9 +2,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ProcesoPesaje from "../vistas/ProcesoPesaje";
 import { Icon } from "react-native-elements";
-import { signOut } from "firebase/auth";
-import { auth } from "../api/firebase";
-
+import auth from "@react-native-firebase/auth";
 const Stack = createNativeStackNavigator();
 
 export default function PesajeStack(props) {
@@ -28,7 +26,11 @@ export default function PesajeStack(props) {
               name="login-variant"
               size={25}
               color="white"
-              onPress={() => signOut(auth).then(() => setUser(null))}
+              onPress={() =>
+                auth()
+                  .signOut()
+                  .then(() => setUser(null))
+              }
             />
           ),
         }}

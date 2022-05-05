@@ -9,6 +9,7 @@ import { DatePicker } from "../../utilidades/datePicker";
 import { FormularioAutocompleteEmpleado } from "./FormularioAutocompleteEmpleado";
 import { storeData } from "../../utilidades/variablesGlobales";
 import { useKeyboard } from "@react-native-community/hooks";
+import firestore from "@react-native-firebase/firestore";
 
 export const FormularioEmpleado = (props) => {
   const { isEnabled, empleados, empleado, setEmpleado, setIndex } = props;
@@ -35,6 +36,10 @@ export const FormularioEmpleado = (props) => {
       fechaNacimiento: selectedDay + "-" + selectedMonth + "-" + selectedYear,
     };
     storeData(data, "@datosEmpleado");
+    await firestore()
+      .collection("Empleados")
+      .doc(getFieldProps("rut").value)
+      .set(data);
     //await setDoc(doc(db, "Empleados", getFieldProps("rut").value), data);
   };
 

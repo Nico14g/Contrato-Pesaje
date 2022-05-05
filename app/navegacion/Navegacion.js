@@ -8,10 +8,9 @@ import pesajeActive from "../../assets/imagenes/pesaje-active.png";
 import pesajeInactive from "../../assets/imagenes/pesaje-inactive.png";
 import ContratoStack from "./ContratoStack";
 import PesajeStack from "./pesajeStack";
-import { auth, db } from "../api/firebase";
-import { doc, onSnapshot } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
 import Login from "../vistas/Login";
+import auth from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -19,9 +18,12 @@ export default function Navigation() {
   const [user, setUser] = useState();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = auth().onAuthStateChanged(async (user) => {
       if (user) {
-        onSnapshot(doc(db, "users", user.uid), (doc) => setUser(doc.data()));
+        firestore()
+          .collection("users")
+          .doc(user.uid)
+          .onSnapshot((doc) => setUser(doc.data()));
       }
     });
 

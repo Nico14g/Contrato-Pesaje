@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, Image, Dimensions, ActivityIndicator } from "react-native";
 import { TextInput, Button, Card, Title, Paragraph } from "react-native-paper";
-
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../api/firebase";
+import auth from "@react-native-firebase/auth";
 
 export default function Login() {
   const [email, setEmail] = useState({ value: "", error: "" });
@@ -42,7 +40,8 @@ export default function Login() {
 
   const loguear = () => {
     setError(false);
-    signInWithEmailAndPassword(auth, email.value, password.value)
+    auth()
+      .signInWithEmailAndPassword(email.value, password.value)
       .then(() => setCargando(false))
       .catch((e) => {
         setCargando(false);

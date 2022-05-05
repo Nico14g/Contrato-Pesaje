@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "889331894546",
+    "project_id": "contrato-pesaje",
+    "storage_bucket": "contrato-pesaje.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:889331894546:android:1c2dde93590c515eb04bcb",
+        "android_client_info": {
+          "package_name": "com.nico14g.Contrato_Pesaje"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "889331894546-ascs07p4qn32btqabmduhblkrm49291u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAnp5IF5YwksssvQJZCImJmZguMY_U9ZEw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "889331894546-ascs07p4qn32btqabmduhblkrm49291u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

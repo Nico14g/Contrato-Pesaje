@@ -7,6 +7,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { FormularioAutocompleteServicio } from "./FormularioAutocompleteServicio";
 import { storeData } from "../../utilidades/variablesGlobales";
 import { useKeyboard } from "@react-native-community/hooks";
+import firestore from "@react-native-firebase/firestore";
 
 export const FormularioServicio = (props) => {
   const { isEnabled, servicios, servicio, setServicio, setIndex } = props;
@@ -20,13 +21,17 @@ export const FormularioServicio = (props) => {
     setIsValid(validarEntradas());
     if (validarEntradas()) {
       await storeData(values, "@datosServicio");
-      //almacenarDatosBD();
+      almacenarDatosBD();
       setIndex(4);
     }
   };
 
   const almacenarDatosBD = async () => {
-    const docRef = await addDoc(collection(db, "Servicios"), values);
+    await firestore()
+      .collection("Servicios")
+      .doc(values.nombreServicio)
+      .set(values);
+    //const docRef = await addDoc(collection(db, "Servicios"), values);
   };
 
   const validarEntradas = () => {

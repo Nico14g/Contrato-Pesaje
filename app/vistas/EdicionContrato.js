@@ -24,6 +24,8 @@ import { Buffer } from "buffer";
 import { convertToHtml } from "mammoth/mammoth.browser";
 import { RichEditor } from "react-native-pell-rich-editor";
 import { useKeyboard } from "@react-native-community/hooks";
+import * as IntentLauncher from "expo-intent-launcher";
+import RNFetchBlob from "rn-fetch-blob";
 
 export default function EdicionContrato() {
   const [plantilla, setPlantilla] = useState("");
@@ -200,28 +202,97 @@ export default function EdicionContrato() {
 
     const buffer = Buffer.from(new Uint8Array(buf));
     let documento = Buffer.from(buffer).toString("base64");
+    console.log(plantilla.item);
+    // const folder = await FileSystem.getInfoAsync(
+    //   FileSystem.documentDirectory + "Contratos/"
+    // );
+
+    // // Check if folder does not exist, create one furthermore
+    // if (!folder.exists) {
+    //   await FileSystem.makeDirectoryAsync(
+    //     FileSystem.documentDirectory + "Contratos/"
+    //   );
+    // }
     let documenturi =
       FileSystem.documentDirectory +
-      `${encodeURI(datosEmpleado.nombreEmpleado)}.docx`;
-    const a = await FileSystem.writeAsStringAsync(documenturi, documento, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
+      datosEmpleado.nombreEmpleado +
+      "-" +
+      datosEmpleado.rut +
+      ".docx";
+
+    // const ans = await FileSystem.getInfoAsync(documenturi);
+    // console.log(ans, "esto es ans");
+    // FileSystem.getContentUriAsync(ans.uri).then((cUri) => {
+    //   //Open save image options
+    //   IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+    //     data: cUri,
+    //     flags: 1,
+    //   });
+    // });
     let { status } = await MediaLibrary.requestPermissionsAsync();
     if (status === "granted") {
-      const uri = await MediaLibrary.createAssetAsync(documenturi);
-      setContratosCreados((contratos) => [...contratos, uri]);
-      storeData([...contratosCreados, uri], CONTRATOS_KEY);
-      Promise.resolve(readData(CONTRATOS_KEY)).then((data) =>
-        data === null ? null : setContratosCreados(data)
-      );
-      setFileName(uri.filename);
-      setMessage(
-        uri.filename + " guardado en el almacenamiento interno /DCIM/"
-      );
-      setOpen(true);
-      setTimeout(() => {
-        Promise.resolve(navigation.navigate("Contratos"));
-      }, 3000);
+      try {
+        console.log(RNFetchBlob.fs.dirs.DownloadDir);
+        const a = await FileSystem.writeAsStringAsync(documenturi, documento, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        RNFetchBlob.fs
+          .mv(
+            documenturi.replace("file://", ""),
+            RNFetchBlob.fs.dirs.DownloadDir +
+              "/" +
+              datosEmpleado.nombreEmpleado +
+              "-" +
+              datosEmpleado.rut +
+              ".docx"
+          )
+          .then(() => {
+            const uri = {
+              uri:
+                "file://" +
+                RNFetchBlob.fs.dirs.DownloadDir +
+                "/" +
+                datosEmpleado.nombreEmpleado +
+                "-" +
+                datosEmpleado.rut +
+                ".docx",
+              fileName:
+                datosEmpleado.nombreEmpleado +
+                "-" +
+                datosEmpleado.rut +
+                ".docx",
+            };
+
+            setContratosCreados((contratos) => [...contratos, uri]);
+            storeData([...contratosCreados, uri], CONTRATOS_KEY);
+            Promise.resolve(readData(CONTRATOS_KEY)).then((data) =>
+              data === null ? null : setContratosCreados(data)
+            );
+            setFileName(
+              datosEmpleado.nombreEmpleado + "-" + datosEmpleado.rut + ".docx"
+            );
+            setMessage(
+              datosEmpleado.nombreEmpleado +
+                "-" +
+                datosEmpleado.rut +
+                ".docx" +
+                " guardado en la carpeta de descargas"
+            );
+            setOpen(true);
+            setTimeout(() => {
+              Promise.resolve(navigation.navigate("Contratos"));
+            }, 3000);
+          });
+        // const uri = await MediaLibrary.createAssetAsync(ans.uri);
+        // const album = await MediaLibrary.getAlbumAsync("Contratos");
+        // if (album === null) {
+        //   await MediaLibrary.createAlbumAsync("Contratos", uri, false);
+        // } else {
+        //   await MediaLibrary.addAssetsToAlbumAsync([uri], album, false);
+        // }
+      } catch (e) {
+        console.log(e);
+      }
     }
   };
 

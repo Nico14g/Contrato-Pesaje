@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+
 import {
   Text,
   StyleSheet,
@@ -64,10 +65,12 @@ function Contrato(props) {
   const { contrato, navigation } = props;
   const STORAGE_KEY = "@plantillaSelect";
 
+  console.log(contrato);
   const seleccionarPlantilla = async () => {
     storeData(contrato, STORAGE_KEY);
     navigation.navigate("EdicionContrato");
   };
+
   return (
     <TouchableOpacity onPress={() => seleccionarPlantilla()}>
       <Card>
@@ -77,7 +80,7 @@ function Contrato(props) {
           </View>
           <View style={styles.colB}>
             <Text style={styles.nombreText}>
-              {contrato.item.filename.substr(0, 25)}
+              {contrato.item.fileName.substr(0, 25)}
             </Text>
           </View>
           <View style={styles.colC}>

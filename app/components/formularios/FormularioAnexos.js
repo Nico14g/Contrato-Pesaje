@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Text, FlatList } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Text,
+  FlatList,
+  Dimensions,
+} from "react-native";
 import { Input, Icon, Button } from "react-native-elements";
 import { useFormik, FormikProvider } from "formik";
 import { db } from "../../api/firebase";
@@ -11,9 +18,10 @@ import { useNavigation } from "@react-navigation/native";
 import { storeData } from "../../utilidades/variablesGlobales";
 import { useKeyboard } from "@react-native-community/hooks";
 import firestore from "@react-native-firebase/firestore";
+import * as ImagePicker from "expo-image-picker";
 
 export const FormularioAnexos = (props) => {
-  const { isEnabled, anexos, anexo, setAnexo } = props;
+  const { isEnabled, anexos, anexo, setAnexo, firmas, setFirmas } = props;
   //validar horas y sueldo
   const navigation = useNavigation();
   const [isValid, setIsValid] = useState(true);
@@ -58,6 +66,7 @@ export const FormularioAnexos = (props) => {
       regimenSalud: selectedSalud,
     };
     storeData(data, "@datosAnexos");
+    storeData(firmas, "@firmas");
     await firestore().collection("Anexos").add(data);
     //const docRef = await addDoc(collection(db, "Anexos"), data);
   };
@@ -90,9 +99,57 @@ export const FormularioAnexos = (props) => {
     setAnexo({ ...anexo, [key]: e });
   };
 
+  const agregarFirma = async (tipoFirma) => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+      base64: true,
+    });
+
+    if (!result.cancelled) {
+      if (tipoFirma === "firmaEmpleador") {
+        setFirmas({ ...firmas, firmaEmpleador: result.base64 });
+      } else {
+        setFirmas({ ...firmas, firmaTrabajador: result.base64 });
+      }
+    }
+  };
   return (
     <FormikProvider value={formik}>
       <>
+        <View style={styles.containerfirmas}>
+          <Button
+            buttonStyle={styles.buttonStyle}
+            onPress={() => agregarFirma("firmaEmpleador")}
+            icon={
+              <Icon
+                type="material-community"
+                name="camera"
+                size={16}
+                color="white"
+              />
+            }
+            titleStyle={{ fontSize: 14 }}
+            title=" Firma Empleador"
+          />
+          <View></View>
+          <Button
+            buttonStyle={styles.buttonStyle}
+            onPress={() => agregarFirma("firmaTrabajador")}
+            icon={
+              <Icon
+                type="material-community"
+                name="camera"
+                size={16}
+                color="white"
+              />
+            }
+            titleStyle={{ fontSize: 14 }}
+            title=" Firma Trabajador"
+          />
+        </View>
         {!isEnabled ? (
           <ScrollView
             style={[
@@ -117,18 +174,7 @@ export const FormularioAnexos = (props) => {
                 width="90%"
               />
             </View>
-            <Input
-              containerStyle={styles.container}
-              inputContainerStyle={styles.inputContainerBeneficios}
-              style={styles.input}
-              placeholderTextColor="gray"
-              placeholder="Beneficios"
-              onChangeText={(e) => actualizarEstado(e, "beneficios")}
-              onBlur={handleBlur("beneficios")}
-              value={values.beneficios}
-              multiline={true}
-              numberOfLines={10}
-            />
+
             <View style={styles.picker}>
               <Picker
                 selectedValue={selectedPension}
@@ -168,6 +214,18 @@ export const FormularioAnexos = (props) => {
               onChangeText={(e) => actualizarEstado(e, "cantidadEjemplares")}
               onBlur={handleBlur("cantidadEjemplares")}
               value={values.cantidadEjemplares}
+            />
+            <Input
+              containerStyle={styles.container}
+              inputContainerStyle={styles.inputContainerBeneficios}
+              style={styles.input}
+              placeholderTextColor="gray"
+              placeholder="Beneficios"
+              onChangeText={(e) => actualizarEstado(e, "beneficios")}
+              onBlur={handleBlur("beneficios")}
+              value={values.beneficios}
+              multiline={true}
+              numberOfLines={10}
             />
           </ScrollView>
         ) : (
@@ -291,5 +349,17 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     marginLeft: "8%",
     marginBottom: 20,
+  },
+  containerfirmas: {
+    flexDirection: "row",
+    alignSelf: "center",
+    alignItems: "center",
+  },
+  buttonStyle: {
+    width: Dimensions.get("window").width * 0.4,
+    backgroundColor: "#99c781",
+    borderColor: "#3f9d2f",
+    height: 50,
+    margin: 10,
   },
 });

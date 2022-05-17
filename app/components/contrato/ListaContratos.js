@@ -65,7 +65,6 @@ function Contrato(props) {
   const { contrato, navigation } = props;
   const STORAGE_KEY = "@plantillaSelect";
 
-  console.log(contrato);
   const seleccionarPlantilla = async () => {
     storeData(contrato, STORAGE_KEY);
     navigation.navigate("EdicionContrato");

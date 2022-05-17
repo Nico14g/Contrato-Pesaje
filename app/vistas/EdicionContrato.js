@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+
 import {
   View,
   KeyboardAvoidingView,
@@ -22,10 +23,19 @@ import * as Sharing from "expo-sharing";
 import * as MediaLibrary from "expo-media-library";
 import { Buffer } from "buffer";
 import { convertToHtml } from "mammoth/mammoth.browser";
-import { RichEditor } from "react-native-pell-rich-editor";
 import { useKeyboard } from "@react-native-community/hooks";
 import * as IntentLauncher from "expo-intent-launcher";
 import RNFetchBlob from "rn-fetch-blob";
+import storage from "@react-native-firebase/storage";
+import { utils } from "@react-native-firebase/app";
+import {
+  actions,
+  RichEditor,
+  RichToolbar,
+} from "react-native-pell-rich-editor";
+import * as ImagePicker from "expo-image-picker";
+import uuid from "react-native-uuid";
+import ImageModule from "docxtemplater-image-module-free";
 
 export default function EdicionContrato() {
   const [plantilla, setPlantilla] = useState("");
@@ -33,6 +43,7 @@ export default function EdicionContrato() {
   const [datosEmpleado, setDatosEmpleado] = useState("");
   const [datosServicio, setDatosServicio] = useState("");
   const [datosAnexos, setDatosAnexos] = useState("");
+  const [firmas, setFirmas] = useState("");
   const [contratosCreados, setContratosCreados] = useState([]);
   const [mostrar, setMostrar] = useState(false);
   const [wordDocument, setWordDocument] = useState("");
@@ -46,6 +57,8 @@ export default function EdicionContrato() {
   const CONTRATOS_KEY = "@contratosCreados";
   const [html, setHtml] = useState("");
   const richText = useRef();
+  const [docReference, setDocReference] = useState("");
+  const [image, setImage] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -55,16 +68,27 @@ export default function EdicionContrato() {
       readData("@datosServicio"),
       readData("@datosAnexos"),
       readData(CONTRATOS_KEY),
+      readData("@firmas"),
     ]).then(async (values) => {
       setPlantilla(values[0]);
       setDatosEmpresa(values[1]);
       setDatosEmpleado(values[2]);
       setDatosServicio(values[3]);
       setDatosAnexos(values[4]);
+      console.log(values[6], "firmas");
+      setFirmas(values[6]);
       values[5] === null ? null : setContratosCreados(values[5]);
-      guardar(values[0], values[1], values[2], values[3], values[4], values[5]);
+      guardar(
+        values[0],
+        values[1],
+        values[2],
+        values[3],
+        values[4],
+        values[5],
+        values[6]
+      );
     });
-  }, [html]);
+  }, []);
 
   const obtenerMes = (mes) => {
     const months = [
@@ -98,7 +122,14 @@ export default function EdicionContrato() {
     return meses[months.indexOf(mes)];
   };
 
-  const docVars = (datosEmpresa, datosEmpleado, datosServicio, datosAnexos) => {
+  const docVars = (
+    datosEmpresa,
+    datosEmpleado,
+    datosServicio,
+    datosAnexos,
+    firmas
+  ) => {
+    console.log(firmas.firmaEmpleador);
     return {
       direccionEmpresa: datosEmpresa.direccion,
       dia: new Date().toUTCString().split(" ", 4)[1],
@@ -136,6 +167,8 @@ export default function EdicionContrato() {
       isapre: datosAnexos.regimenSalud === "Fonasa" ? "..." : "X",
       fechaInicioFaenas: datosAnexos.fechaInicioFaenas,
       cantidadEjemplares: datosAnexos.cantidadEjemplares,
+      firmaEmpleador: firmas?.firmaEmpleador,
+      firmaTrabajador: firmas?.firmaTrabajador,
     };
   };
 
@@ -153,13 +186,64 @@ export default function EdicionContrato() {
     }, 2000);
   };
 
+  const subirStorage = async (doc, datosEmpleado) => {
+    const buf = doc.getZip().generate({
+      type: "arrayBuffer",
+      mimeType:
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    });
+
+    const buffer = Buffer.from(new Uint8Array(buf));
+    let documento = Buffer.from(buffer).toString("base64");
+
+    let documenturi =
+      FileSystem.documentDirectory +
+      datosEmpleado.nombreEmpleado +
+      "-" +
+      datosEmpleado.rut +
+      ".docx";
+
+    await FileSystem.writeAsStringAsync(documenturi, documento, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+
+    const reference = storage().ref(
+      datosEmpleado.nombreEmpleado + "-" + datosEmpleado.rut + ".docx"
+    );
+    setDocReference(reference);
+
+    const pathToFile =
+      `${FileSystem.documentDirectory.replace("file://", "")}` +
+      datosEmpleado.nombreEmpleado +
+      "-" +
+      datosEmpleado.rut +
+      ".docx";
+    // uploads file
+    await reference.putFile(pathToFile);
+  };
+
+  const imageOpts = {
+    getImage: function (tagValue, tagName) {
+      return Buffer.from(tagValue, "base64");
+      // console.log(tagName, "este es el tagName");
+      // if (tagName === "firmaEmpleador")
+      //   return Buffer.from(firmas.firmaEmpleador, "base64");
+      // if (tagName === "firmaTrabajador")
+      //   return Buffer.from(firmas.firmaTrabajador, "base64");
+    },
+    getSize: function (img, tagValue) {
+      return [150, 150];
+    },
+  };
+
   const guardar = async (
     plantilla,
     datosEmpresa,
     datosEmpleado,
     datosServicio,
     datosAnexos,
-    contratos
+    contratos,
+    firmas
   ) => {
     const fileInfo = await FileSystem.getInfoAsync(plantilla.item.uri);
     if (!fileInfo.exists) {
@@ -171,14 +255,22 @@ export default function EdicionContrato() {
       let document = Buffer.from(content, "base64");
 
       const zip = new PizZip(document);
-
+      console.log("asdasdas");
+      var imageModule = new ImageModule(imageOpts);
       const doc = new Docxtemplater(zip, {
+        modules: [imageModule],
         paragraphLoop: true,
         linebreaks: true,
       });
 
       doc.render({
-        ...docVars(datosEmpresa, datosEmpleado, datosServicio, datosAnexos),
+        ...docVars(
+          datosEmpresa,
+          datosEmpleado,
+          datosServicio,
+          datosAnexos,
+          firmas
+        ),
       });
       setWordDocument(doc);
       const buf = doc.getZip().generate({
@@ -189,7 +281,10 @@ export default function EdicionContrato() {
 
       const htmlResult = await convertToHtml({ arrayBuffer: buf });
 
+      console.log("entro acaccaacac");
       setHtml(htmlResult.value);
+
+      subirStorage(doc, datosEmpleado);
     }
   };
 
@@ -201,8 +296,31 @@ export default function EdicionContrato() {
     });
 
     const buffer = Buffer.from(new Uint8Array(buf));
+
     let documento = Buffer.from(buffer).toString("base64");
     console.log(plantilla.item);
+
+    const preHtml =
+      "<!DOCTYPE html PUBLIC `-//W3C//DTD XHTML 1.0 Transitional//EN` `http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd`> <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta http-equiv=`Content-Type` content=`text/html; charset=utf-8` /> <title>Export HTML To Doc</title></head><body>";
+    const postHtml = "</body></html>";
+
+    const newHTML = preHtml + html + postHtml;
+
+    let documentob = Buffer.from(newHTML).toString("base64");
+
+    await FileSystem.writeAsStringAsync(
+      FileSystem.documentDirectory + datosEmpleado.rut + ".docx",
+      documentob,
+      {
+        encoding: FileSystem.EncodingType.Base64,
+      }
+    );
+    RNFetchBlob.fs.mv(
+      FileSystem.documentDirectory.replace("file://", "") +
+        datosEmpleado.rut +
+        ".docx",
+      RNFetchBlob.fs.dirs.DownloadDir + "/" + datosEmpleado.rut + ".docx"
+    );
     // const folder = await FileSystem.getInfoAsync(
     //   FileSystem.documentDirectory + "Contratos/"
     // );
@@ -314,6 +432,32 @@ export default function EdicionContrato() {
     await Sharing.shareAsync(documenturi);
   };
 
+  const agregarFirma = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+      base64: true,
+    });
+
+    if (!result.cancelled) {
+      setImage([result.uri]);
+
+      const id = uuid.v4();
+
+      const reference = storage().ref(
+        result.uri.substring(result.uri.lastIndexOf("/") + 1)
+      );
+
+      await reference.putFile(result.uri);
+      const url = await reference.getDownloadURL();
+      console.log(url);
+      richText.current?.insertImage(url);
+      return result.uri;
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View>
@@ -355,17 +499,31 @@ export default function EdicionContrato() {
         ) : (
           <>
             <View style={{ height: "90%" }}>
-              <TouchableOpacity onPress={() => setMostrar(false)}>
-                <ScrollView>
-                  <KeyboardAvoidingView>
-                    <RichEditor
-                      ref={richText}
-                      initialContentHTML={html === "" ? "" : html}
-                      disabled={true}
-                    />
-                  </KeyboardAvoidingView>
-                </ScrollView>
-              </TouchableOpacity>
+              <ScrollView>
+                <RichEditor
+                  ref={richText}
+                  initialContentHTML={html === "" ? "" : html}
+                  onChange={(texto) => setHtml(texto)}
+                  disabled={true}
+                />
+              </ScrollView>
+              {/* <RichToolbar
+                style={{ marginBottom: 30 }}
+                editor={richText}
+                actions={[
+                  actions.insertImage,
+                  actions.setBold,
+                  actions.setItalic,
+                  actions.setUnderline,
+                  actions.heading1,
+                ]}
+                onPressAddImage={() => agregarFirma()}
+                iconMap={{
+                  [actions.heading1]: ({ tintColor }) => (
+                    <Text style={[{ color: tintColor }]}>H1</Text>
+                  ),
+                }}
+              /> */}
             </View>
             {open && (
               <SnackBar open={open} setOpen={setOpen} message={message} />

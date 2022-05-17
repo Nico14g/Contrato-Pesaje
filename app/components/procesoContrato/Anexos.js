@@ -19,6 +19,11 @@ export default function Anexos() {
     cantidadEjemplares: "",
   });
 
+  const [firmas, setFirmas] = useState({
+    firmaEmpleador: "",
+    firmaTrabajador: "",
+  });
+
   useEffect(() => {
     if (componentMounted.current) {
       consulta();
@@ -52,6 +57,8 @@ export default function Anexos() {
         anexos={anexos}
         anexo={anexo}
         setAnexo={setAnexo}
+        firmas={firmas}
+        setFirmas={setFirmas}
       />
     </>
   );

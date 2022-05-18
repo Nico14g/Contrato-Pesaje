@@ -13,7 +13,8 @@ import Empresa from "../components/procesoContrato/Empresa";
 import Plantilla from "../components/procesoContrato/Plantilla";
 import Servicio from "../components/procesoContrato/Servicio";
 
-export default function TabProcesoContrato() {
+export default function TabProcesoContrato(props) {
+  const { user } = props;
   const layout = useWindowDimensions();
   const [plantillaSelect, setPlantillaSelect] = useState("");
   const [index, setIndex] = useState(0);
@@ -37,13 +38,13 @@ export default function TabProcesoContrato() {
           />
         );
       case "empresa":
-        return <Empresa setIndex={setIndex} />;
+        return <Empresa setIndex={setIndex} user={user} />;
       case "empleado":
-        return <Empleado setIndex={setIndex} />;
+        return <Empleado setIndex={setIndex} user={user} />;
       case "servicio":
-        return <Servicio setIndex={setIndex} />;
+        return <Servicio setIndex={setIndex} user={user} />;
       case "anexos":
-        return <Anexos />;
+        return <Anexos user={user} />;
       default:
         return null;
     }

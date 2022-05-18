@@ -31,7 +31,6 @@ export default function EscrituraNFC(props) {
   const escribirNdef = async (bytes) => {
     //await NfcManager.requestTechnology(NfcTech.Ndef);
     const e = await NfcManager.ndefHandler.writeNdefMessage(bytes);
-    console.log("resultado", e);
     return true;
   };
 
@@ -69,13 +68,12 @@ export default function EscrituraNFC(props) {
 
       const supported = await NfcManager.isSupported();
       const nfcScanning = await NfcManager.isEnabled();
-      console.log(supported, "suported");
+
       if (supported && nfcScanning) {
         await NfcManager.requestTechnology([]);
         let tag = null;
         tag = await NfcManager.getTag();
         if (tag !== null) {
-          console.log(tag);
           let tech = undefined;
           for (let i = 0; i < tag.techTypes.length; i++) {
             tech = techs.find(

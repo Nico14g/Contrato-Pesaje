@@ -5,7 +5,8 @@ import { Text, Button, Icon, SearchBar } from "react-native-elements";
 import ListaContratos from "../components/contrato/ListaContratos";
 import { readData } from "../utilidades/variablesGlobales";
 
-export default function Contratos() {
+export default function Contratos(props) {
+  const { user } = props;
   const navigation = useNavigation();
   const [search, setSearch] = useState("");
   const [contratosCreados, setContratosCreados] = useState([]);

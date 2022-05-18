@@ -10,7 +10,7 @@ import { useKeyboard } from "@react-native-community/hooks";
 import firestore from "@react-native-firebase/firestore";
 
 export const FormularioServicio = (props) => {
-  const { isEnabled, servicios, servicio, setServicio, setIndex } = props;
+  const { isEnabled, servicios, servicio, setServicio, setIndex, cuid } = props;
   //validar horas y sueldo
   const [isValid, setIsValid] = useState(true);
   const [isPressed, setIsPressed] = useState(false);
@@ -27,10 +27,11 @@ export const FormularioServicio = (props) => {
   };
 
   const almacenarDatosBD = async () => {
+    const data = { ...values, cuid };
     await firestore()
       .collection("Servicios")
       .doc(values.nombreServicio)
-      .set(values);
+      .set(data);
     //const docRef = await addDoc(collection(db, "Servicios"), values);
   };
 

@@ -11,7 +11,7 @@ import { useKeyboard } from "@react-native-community/hooks";
 import firestore from "@react-native-firebase/firestore";
 
 export const FormularioEmpresa = (props) => {
-  const { isEnabled, empresas, setEmpresas, setIndex } = props;
+  const { isEnabled, empresas, setEmpresas, setIndex, cuid } = props;
   const [validateRutRazon, setValidateRutRazon] = useState(false);
   const [validateRutRepresentante, setValidateRutRepresentante] =
     useState(false);
@@ -39,10 +39,11 @@ export const FormularioEmpresa = (props) => {
   };
 
   const almacenarDatosBD = async () => {
+    const data = { ...values, cuid };
     await firestore()
       .collection("Empresa")
       .doc(getFieldProps("rutRazonSocial").value)
-      .set(values);
+      .set(data);
     // await setDoc(
     //   doc(db, "Empresa", getFieldProps("rutRazonSocial").value),
     //   values

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Text, Dimensions } from "react-native";
+import { View, StyleSheet, Text, Dimensions, ScrollView } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Autocomplete from "react-native-autocomplete-input";
 import { DatePicker } from "../../utilidades/datePicker";
@@ -96,52 +96,6 @@ export const FormularioAutocompleteAnexos = (props) => {
           to={new Date().getFullYear() + 1}
           width="100%"
         />
-        <View style={{ marginTop: 30 }}></View>
-        <Autocomplete
-          style={styles.autoComplete}
-          containerStyle={styles.autoCompleteContainerBeneficios}
-          inputContainerStyle={styles.autoCompleteInputBeneficios}
-          data={options.beneficios}
-          placeholderTextColor="gray"
-          multiline={true}
-          numberOfLines={10}
-          placeholder="Beneficios"
-          value={anexo.beneficios}
-          onChangeText={(text) => {
-            setAnexo({ ...anexo, beneficios: text });
-            setValues({ ...values, beneficios: text });
-            setOptions({
-              ...options,
-              beneficios: query("beneficios").filter((anexo) => {
-                return anexo.toLowerCase().includes(text.toLowerCase());
-              }),
-            });
-            setHideResults({ ...hideResults, beneficios: false });
-          }}
-          onFocus={() => setHideResults({ ...hideResults, beneficios: false })}
-          onEndEditing={() =>
-            setHideResults({ ...hideResults, beneficios: true })
-          }
-          hideResults={hideResults.beneficios}
-          flatListProps={{
-            nestedScrollEnabled: () => true,
-            keyExtractor: (_, idx) => idx,
-            renderItem: ({ item }) => (
-              <TouchableOpacity
-                onPress={() => {
-                  seleccion(item, "beneficios");
-                  setOptions({
-                    ...options,
-                    beneficios: [],
-                  });
-                  setHideResults({ ...hideResults, beneficios: true });
-                }}
-              >
-                <Text style={{ fontSize: 16 }}>{item}</Text>
-              </TouchableOpacity>
-            ),
-          }}
-        />
       </View>
 
       <View style={styles.picker}>
@@ -170,7 +124,14 @@ export const FormularioAutocompleteAnexos = (props) => {
           <Picker.Item label="Isapre" value={"Isapre"} />
         </Picker>
       </View>
-      <View style={styles.scrollView}>
+      <View
+        style={{
+          marginBottom: 20,
+          alignItems: "center",
+          left: "5%",
+          maxWidth: "90%",
+        }}
+      >
         <Autocomplete
           style={styles.autoComplete}
           containerStyle={styles.autoCompleteContainer}
@@ -221,6 +182,51 @@ export const FormularioAutocompleteAnexos = (props) => {
             ),
           }}
         />
+        <Autocomplete
+          style={styles.autoComplete}
+          containerStyle={styles.autoCompleteContainer}
+          inputContainerStyle={styles.autoCompleteInput}
+          data={options.beneficios}
+          placeholderTextColor="gray"
+          multiline={true}
+          numberOfLines={10}
+          placeholder="Beneficios"
+          value={anexo.beneficios}
+          onChangeText={(text) => {
+            setAnexo({ ...anexo, beneficios: text });
+            setValues({ ...values, beneficios: text });
+            setOptions({
+              ...options,
+              beneficios: query("beneficios").filter((anexo) => {
+                return anexo.toLowerCase().includes(text.toLowerCase());
+              }),
+            });
+            setHideResults({ ...hideResults, beneficios: false });
+          }}
+          onFocus={() => setHideResults({ ...hideResults, beneficios: false })}
+          onEndEditing={() =>
+            setHideResults({ ...hideResults, beneficios: true })
+          }
+          hideResults={hideResults.beneficios}
+          flatListProps={{
+            nestedScrollEnabled: () => true,
+            keyExtractor: (_, idx) => idx,
+            renderItem: ({ item }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  seleccion(item, "beneficios");
+                  setOptions({
+                    ...options,
+                    beneficios: [],
+                  });
+                  setHideResults({ ...hideResults, beneficios: true });
+                }}
+              >
+                <Text style={{ fontSize: 16 }}>{item}</Text>
+              </TouchableOpacity>
+            ),
+          }}
+        />
       </View>
     </View>
   );
@@ -249,7 +255,6 @@ const styles = StyleSheet.create({
     borderColor: "lightgrey",
     maxHeight: 80,
     width: Dimensions.get("window").width * 0.85,
-    zIndex: 1,
   },
   autoCompleteInputBeneficios: {
     borderRadius: 7,
@@ -277,6 +282,7 @@ const styles = StyleSheet.create({
     marginLeft: "8%",
   },
   scrollView: {
+    alignContent: "center",
     alignItems: "center",
     alignSelf: "center",
     maxWidth: "90%",

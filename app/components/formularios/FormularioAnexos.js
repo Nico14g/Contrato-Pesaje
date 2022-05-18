@@ -21,7 +21,7 @@ import firestore from "@react-native-firebase/firestore";
 import * as ImagePicker from "expo-image-picker";
 
 export const FormularioAnexos = (props) => {
-  const { isEnabled, anexos, anexo, setAnexo, firmas, setFirmas } = props;
+  const { isEnabled, anexos, anexo, setAnexo, firmas, setFirmas, cuid } = props;
   //validar horas y sueldo
   const navigation = useNavigation();
   const [isValid, setIsValid] = useState(true);
@@ -64,10 +64,11 @@ export const FormularioAnexos = (props) => {
       fechaActual: fechaActual,
       regimenPension: selectedPension,
       regimenSalud: selectedSalud,
+      cuid: cuid,
     };
     storeData(data, "@datosAnexos");
     storeData(firmas, "@firmas");
-    await firestore().collection("Anexos").add(data);
+    await firestore().collection("Anexos").doc(data.beneficios).set(data);
     //const docRef = await addDoc(collection(db, "Anexos"), data);
   };
 
@@ -217,7 +218,7 @@ export const FormularioAnexos = (props) => {
             />
             <Input
               containerStyle={styles.container}
-              inputContainerStyle={styles.inputContainerBeneficios}
+              inputContainerStyle={styles.inputContainer}
               style={styles.input}
               placeholderTextColor="gray"
               placeholder="Beneficios"

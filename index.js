@@ -6,9 +6,8 @@ import firestore from "@react-native-firebase/firestore";
 
 async function bootstrap() {
   await firestore().settings({
-    persistence: true, // disable offline persistence
+    persistence: true,
   });
-  console.log("persistencia");
 }
 
 import App from "./App";

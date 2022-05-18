@@ -6,7 +6,7 @@ import { collection, getDocs } from "firebase/firestore";
 import firestore from "@react-native-firebase/firestore";
 
 export default function Empresa(props) {
-  const { setIndex } = props;
+  const { setIndex, user } = props;
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const [empresas, setEmpresas] = useState([]);
@@ -17,14 +17,18 @@ export default function Empresa(props) {
     if (componentMounted.current) {
       let data = [];
       let id = [];
+      const cuid = user.rol === "company" ? user.uid : user.cuid;
+
       firestore()
         .collection("Empresa")
+        .where("cuid", "==", cuid)
         .onSnapshot((querySnapshot) => {
           querySnapshot.forEach((doc) => {
             data.push(doc.data());
             id.push(doc.id);
           });
           setEmpresas(data);
+          console.log(data);
           setIdEmpresas(id);
         });
       // getDocs(collection(db, "Empresa")).then((documentos) => {
@@ -67,6 +71,7 @@ export default function Empresa(props) {
         title="Datos Empresa"
       />
       <FormularioEmpresa
+        cuid={user.rol === "company" ? user.uid : user.cuid}
         isEnabled={isEnabled}
         empresas={empresas}
         setEmpresas={setEmpresas}

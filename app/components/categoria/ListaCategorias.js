@@ -15,7 +15,7 @@ import { size } from "lodash";
 
 export default function ListaCategorias(props) {
   const { categorias, setIndex } = props;
-  console.log(categorias, "estas llegaron aca");
+
   const componentMounted = useRef(true);
   const [cargado, setCargado] = useState(false);
 

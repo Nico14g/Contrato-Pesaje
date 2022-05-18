@@ -12,7 +12,7 @@ import { useKeyboard } from "@react-native-community/hooks";
 import firestore from "@react-native-firebase/firestore";
 
 export const FormularioEmpleado = (props) => {
-  const { isEnabled, empleados, empleado, setEmpleado, setIndex } = props;
+  const { isEnabled, empleados, empleado, setEmpleado, setIndex, cuid } = props;
   const [validateRutEmpleado, setValidateRutEmpleado] = useState(false);
   const [isValid, setIsValid] = useState(true);
   const [isPressed, setIsPressed] = useState(false);
@@ -34,6 +34,7 @@ export const FormularioEmpleado = (props) => {
     let data = {
       ...values,
       fechaNacimiento: selectedDay + "-" + selectedMonth + "-" + selectedYear,
+      cuid: cuid,
     };
     storeData(data, "@datosEmpleado");
     await firestore()

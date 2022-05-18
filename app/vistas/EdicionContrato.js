@@ -37,7 +37,8 @@ import * as ImagePicker from "expo-image-picker";
 import uuid from "react-native-uuid";
 import ImageModule from "docxtemplater-image-module-free";
 
-export default function EdicionContrato() {
+export default function EdicionContrato(props) {
+  const { user } = props;
   const [plantilla, setPlantilla] = useState("");
   const [datosEmpresa, setDatosEmpresa] = useState("");
   const [datosEmpleado, setDatosEmpleado] = useState("");

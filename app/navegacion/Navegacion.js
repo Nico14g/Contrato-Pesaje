@@ -47,7 +47,7 @@ export default function Navigation() {
           >
             <Tab.Screen
               name="ContratoStack"
-              children={() => <ContratoStack setUser={setUser} />}
+              children={() => <ContratoStack user={user} setUser={setUser} />}
               options={{
                 title: "Contratos",
               }}

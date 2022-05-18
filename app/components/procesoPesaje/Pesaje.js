@@ -97,7 +97,6 @@ export default function Pesaje(props) {
               temporeros.push(doc.data());
             }
           });
-          console.log(temporeros, "estos son los temporeros");
           setTemporeros(temporeros);
         });
     }

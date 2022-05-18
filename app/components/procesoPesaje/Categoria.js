@@ -60,7 +60,6 @@ export default function Categoria(props) {
         });
 
         if (componentMounted.current) {
-          console.log(categorias.length, "largo");
           setRegistros(registros);
           setCategorias(categorias);
         }

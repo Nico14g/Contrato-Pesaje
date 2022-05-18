@@ -24,7 +24,6 @@ export default function LecturaNFC(props) {
   const [isScanned, setIsScanned] = useState(false);
   const [error, setError] = useState(false);
   const { values } = formik;
-  console.log(values);
 
   useEffect(() => {
     readNdef();

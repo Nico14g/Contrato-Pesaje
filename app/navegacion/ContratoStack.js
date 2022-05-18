@@ -10,13 +10,13 @@ import auth from "@react-native-firebase/auth";
 const Stack = createNativeStackNavigator();
 
 export default function ContratoStack(props) {
-  const { setUser } = props;
+  const { setUser, user } = props;
 
   return (
     <Stack.Navigator>
       <Stack.Screen
         name="Contratos"
-        component={Contratos}
+        children={() => <Contratos user={user} />}
         options={{
           title: "Contratos",
           headerBackVisible: false,
@@ -42,7 +42,7 @@ export default function ContratoStack(props) {
       />
       <Stack.Screen
         name="TabProcesoContrato"
-        component={TabProcesoContrato}
+        children={() => <TabProcesoContrato user={user} />}
         options={{
           title: "Creación Contrato",
           headerBackVisible: true,
@@ -55,7 +55,7 @@ export default function ContratoStack(props) {
       />
       <Stack.Screen
         name="EdicionContrato"
-        component={EdicionContrato}
+        children={() => <EdicionContrato user={user} />}
         options={{
           title: "Editor Contrato",
           headerBackVisible: false,

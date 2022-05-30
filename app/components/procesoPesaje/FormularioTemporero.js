@@ -23,9 +23,9 @@ export default function FormularioTemporero(props) {
         style={styles.input}
         placeholderTextColor="gray"
         placeholder="Nombre Temporero"
-        onChangeText={(e) => actualizarEstado(e, "name")}
-        onBlur={handleBlur("name")}
-        value={values.name}
+        onChangeText={(e) => actualizarEstado(e, "nombreTemporero")}
+        onBlur={handleBlur("nombreTemporero")}
+        value={values.nombreTemporero}
       />
 
       <Input
@@ -34,16 +34,16 @@ export default function FormularioTemporero(props) {
         style={styles.input}
         placeholderTextColor="gray"
         placeholder="Rut"
-        onChangeText={(e) => actualizarEstado(e, "run")}
+        onChangeText={(e) => actualizarEstado(e, "rut")}
         onBlur={() => {
-          setValidateRutEmpleado(!validateRut(getFieldProps("run").value));
+          setValidateRutEmpleado(!validateRut(getFieldProps("rut").value));
           setFieldValue(
-            "run",
-            formatRut(getFieldProps("run").value, RutFormat.DOTS_DASH)
+            "rut",
+            formatRut(getFieldProps("rut").value, RutFormat.DOTS_DASH)
           );
         }}
         errorMessage={validateRutEmpleado && "Rut no válido"}
-        value={values.run}
+        value={values.rut}
       />
     </FormikProvider>
   );

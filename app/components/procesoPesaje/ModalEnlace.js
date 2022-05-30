@@ -56,13 +56,13 @@ export default function ModalEnlace(props) {
                   >
                     {temporeros.map((temporero) => (
                       <Picker.Item
-                        key={temporero.run}
+                        key={temporero.rut}
                         label={
                           temporero.firstName +
                           " " +
                           temporero.lastName +
                           " - " +
-                          temporero.run
+                          temporero.rut
                         }
                         value={temporero}
                       />

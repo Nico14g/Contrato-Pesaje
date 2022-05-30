@@ -21,7 +21,7 @@ export default function Navigation() {
     const unsubscribe = auth().onAuthStateChanged(async (user) => {
       if (user) {
         firestore()
-          .collection("users")
+          .collection("usuarios")
           .doc(user.uid)
           .onSnapshot((doc) => setUser(doc.data()));
       }

@@ -45,8 +45,10 @@ export default function LecturaNFC(props) {
           console.log(tag, "esto es el tag");
           console.log(Ndef.text.decodePayload(tag.ndefMessage[0].payload));
           console.log(Ndef.text.decodePayload(tag.ndefMessage[1].payload));
-          values.name = Ndef.text.decodePayload(tag.ndefMessage[1].payload);
-          values.run = Ndef.text.decodePayload(tag.ndefMessage[0].payload);
+          values.nombreTemporero = Ndef.text.decodePayload(
+            tag.ndefMessage[1].payload
+          );
+          values.rut = Ndef.text.decodePayload(tag.ndefMessage[0].payload);
         }
         NfcManager.cancelTechnologyRequest();
         setError(false);

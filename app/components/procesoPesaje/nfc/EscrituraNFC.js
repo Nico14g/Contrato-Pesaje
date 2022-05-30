@@ -86,7 +86,7 @@ export default function EscrituraNFC(props) {
           if (tech !== undefined) {
             const bytes = Ndef.encodeMessage([
               Ndef.textRecord(selectedTemporero.name),
-              Ndef.textRecord(selectedTemporero.run),
+              Ndef.textRecord(selectedTemporero.rut),
             ]);
             console.log(bytes);
             if (bytes) {

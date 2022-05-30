@@ -15,14 +15,14 @@ export default function Categoria(props) {
   const [open, setOpen] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [registros, setRegistros] = useState([]);
-  const [workerRegisters, setWorkerRegisters] = useState([]);
+  const [registrosTemporero, setRegistrosTemporero] = useState([]);
   const [message, setMessage] = useState("");
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const cuid = user.rol === "company" ? user.uid : user.cuid;
     firestore()
-      .collection("category")
+      .collection("categoria")
       .where("cuid", "==", cuid)
       .onSnapshot((querySnapshot) => {
         let categorias = [];
@@ -30,41 +30,41 @@ export default function Categoria(props) {
         querySnapshot.forEach((doc) => {
           let registers = [];
           firestore()
-            .collection("category/" + doc.id + "/registers")
+            .collection("categoria/" + doc.id + "/registros")
             .onSnapshot((querySnapshot2) => {
               querySnapshot2.forEach((doc2) => {
-                let workerRegisters = [];
+                let registrosTemporero = [];
                 firestore()
                   .collection(
-                    "category/" +
+                    "categoria/" +
                       doc.id +
-                      "/registers/" +
+                      "/registros/" +
                       doc2.id +
-                      "/workerRegisters"
+                      "/registrosTemporero"
                   )
                   .onSnapshot((querySnapshot3) => {
                     querySnapshot3.forEach((doc3) => {
-                      workerRegisters.push(doc3.data());
+                      registrosTemporero.push(doc3.data());
                     });
                     registers.push({
                       ...doc2.data(),
-                      workerRegisters: workerRegisters,
+                      registrosTemporero: registrosTemporero,
                     });
-                    setWorkerRegisters((a) => [...a, workerRegisters]);
+                    setRegistrosTemporero((a) => [...a, registrosTemporero]);
                   });
               });
             });
 
-          categorias.push({ ...doc.data(), registers: registers });
+          categorias.push({ ...doc.data(), registros: registers });
           registros.push(registers);
         });
 
         if (componentMounted.current) {
           setRegistros(registros);
-          setCategorias(categorias);
+          setCategorias(categorias.sort(porFecha));
         }
       });
-  }, [user.uid, user.cuid, user.rol, user.run]);
+  }, [user.uid, user.cuid, user.rol, user.rut]);
 
   // useEffect(() => {
   //   const cuid = user.rol === "company" ? user.uid : user.cuid;
@@ -89,7 +89,7 @@ export default function Categoria(props) {
   //                 ...doc2.data(),
   //                 workerRegisters: workerRegisters,
   //               });
-  //               setWorkerRegisters((a) => [...a, workerRegisters]);
+  //               setRegistrosTemporero((a) => [...a, workerRegisters]);
   //             }
   //           );
   //         });
@@ -103,35 +103,45 @@ export default function Categoria(props) {
   //       setCategorias(categorias);
   //     }
   //   });
-  // }, [user.uid, user.cuid, user.rol, user.run]);
+  // }, [user.uid, user.cuid, user.rol, user.rut]);
 
   useEffect(() => {
     if (categorias.length > 0 && registros.length > 0) {
       setLoaded(true);
     }
-  }, [categorias, registros, workerRegisters]);
+  }, [categorias, registros, registrosTemporero]);
+
+  function porFecha(a, b) {
+    if (a.fechaTermino === "") {
+      return -1;
+    } else {
+      return 1;
+    }
+  }
   return (
     <>
       <View style={styles.container}>
         <View style={styles.item}>
           <Text h4>Selección de Categoría</Text>
         </View>
-        <View style={styles.nuevo}>
-          <Button
-            onPress={() => setOpen(true)}
-            buttonStyle={styles.boton}
-            icon={
-              <Icon
-                type="material-community"
-                name="plus"
-                size={20}
-                color="white"
-              />
-            }
-            titleStyle={{ fontSize: 14 }}
-            title="Añadir"
-          />
-        </View>
+        {user.rol !== "planner" && (
+          <View style={styles.nuevo}>
+            <Button
+              onPress={() => setOpen(true)}
+              buttonStyle={styles.boton}
+              icon={
+                <Icon
+                  type="material-community"
+                  name="plus"
+                  size={20}
+                  color="white"
+                />
+              }
+              titleStyle={{ fontSize: 14 }}
+              title="Añadir"
+            />
+          </View>
+        )}
       </View>
       <SearchBar
         lightTheme
@@ -148,7 +158,9 @@ export default function Categoria(props) {
             search === ""
               ? categorias
               : categorias.filter((categoria) =>
-                  categoria.name.toLowerCase().includes(search.toLowerCase())
+                  categoria.nombreCategoria
+                    .toLowerCase()
+                    .includes(search.toLowerCase())
                 )
           }
           setIndex={setIndex}
@@ -182,10 +194,10 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     maxHeight: "12%",
     marginTop: 20,
+    alignSelf: "center",
   },
 
   item: {
-    width: "70%",
     flexDirection: "row-reverse",
     alignSelf: "center",
   },

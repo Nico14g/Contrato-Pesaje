@@ -4,7 +4,7 @@ import { TextInput, Button, Card, Title, Paragraph } from "react-native-paper";
 import auth from "@react-native-firebase/auth";
 
 export default function Login() {
-  const [email, setEmail] = useState({ value: "", error: "" });
+  const [correo, setCorreo] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(false);
@@ -16,17 +16,17 @@ export default function Login() {
     return "";
   }
 
-  function emailValidator(email) {
+  function emailValidator(correo) {
     const re = /\S+@\S+\.\S+/;
-    if (!email) return "El Correo es requerido";
-    if (!re.test(email)) return "Ingrese un correo valido";
+    if (!correo) return "El Correo es requerido";
+    if (!re.test(correo)) return "Ingrese un correo valido";
     return "";
   }
   const onLoginPressed = () => {
-    const emailError = emailValidator(email.value);
+    const emailError = emailValidator(correo.value);
     const passwordError = passwordValidator(password.value);
     if (emailError || passwordError) {
-      setEmail({ ...email, error: emailError });
+      setEmail({ ...correo, error: emailError });
       setPassword({ ...password, error: passwordError });
       return;
     }
@@ -41,7 +41,7 @@ export default function Login() {
   const loguear = () => {
     setError(false);
     auth()
-      .signInWithEmailAndPassword(email.value, password.value)
+      .signInWithEmailAndPassword(correo.value, password.value)
       .then(() => setCargando(false))
       .catch((e) => {
         setCargando(false);
@@ -61,10 +61,10 @@ export default function Login() {
         <TextInput
           label="Correo"
           returnKeyType="next"
-          value={email.value}
-          onChangeText={(text) => setEmail({ value: text, error: "" })}
-          error={!!email.error}
-          errorMessage={email.error}
+          value={correo.value}
+          onChangeText={(text) => setCorreo({ value: text, error: "" })}
+          error={!!correo.error}
+          errorMessage={correo.error}
           autoCapitalize="none"
           autoCompleteType="email"
           textContentType="emailAddress"
@@ -72,9 +72,9 @@ export default function Login() {
           mode="outlined"
           activeOutlineColor="#2f3bc7"
         />
-        {!!email.error && (
+        {!!correo.error && (
           <Paragraph style={{ left: 2, color: "#d32f2f" }}>
-            {email.error}
+            {correo.error}
           </Paragraph>
         )}
 

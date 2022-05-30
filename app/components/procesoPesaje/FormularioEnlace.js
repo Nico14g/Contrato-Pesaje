@@ -39,13 +39,13 @@ export default function FormularioEnlace(props) {
         style={styles.input}
         placeholderTextColor="gray"
         placeholder="Rut"
-        onChangeText={(e) => actualizarEstado(e, "run")}
+        onChangeText={(e) => actualizarEstado(e, "rut")}
         onBlur={() => {
-          setValidateRutEmpleado(!validateRut(getFieldProps("run").value));
-          values.run = formatRut(values.run);
+          setValidateRutEmpleado(!validateRut(getFieldProps("rut").value));
+          values.rut = formatRut(values.rut);
         }}
         errorMessage={validateRutEmpleado && "Rut no válido"}
-        value={values.run}
+        value={values.rut}
       />
     </FormikProvider>
   );

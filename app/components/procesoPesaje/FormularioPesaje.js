@@ -25,19 +25,19 @@ export default function FormularioPesaje(props) {
   const actualizarEstado = (e, key) => {
     const str = e.replace(",", ".");
     setValues({ ...values, [key]: str });
-    if (key === "originalWeight") {
+    if (key === "pesoOriginal") {
       const valor = /^(?:[1-9]\d*|0)?(?:\.\d+)?$/gm.test(str);
       setErrorPeso(!valor);
-      values.originalWeight = str;
+      values.pesoOriginal = str;
       if (valor && str !== "") {
         setValues({
           ...values,
-          weight: parseFloat(str) - values.dcto,
+          peso: parseFloat(str) - values.dcto,
         });
       } else {
         setValues({
           ...values,
-          weight: "",
+          peso: "",
         });
       }
     }
@@ -72,9 +72,9 @@ export default function FormularioPesaje(props) {
           style={styles.textInput}
           outlineColor="lightgrey"
           placeholder="Peso Bruto"
-          onChangeText={(e) => actualizarEstado(e, "originalWeight")}
+          onChangeText={(e) => actualizarEstado(e, "pesoOriginal")}
           keyboardType="number-pad"
-          value={values.originalWeight.toString()}
+          value={values.pesoOriginal.toString()}
           activeOutlineColor="lightgrey"
           right={<TextInput.Affix text="KG" />}
         />
@@ -88,7 +88,7 @@ export default function FormularioPesaje(props) {
           activeOutlineColor="lightgrey"
           placeholder="Peso Neto"
           keyboardType="numeric"
-          value={values.weight.toString()}
+          value={values.peso.toString()}
           right={<TextInput.Affix text="KG" />}
         />
       </View>

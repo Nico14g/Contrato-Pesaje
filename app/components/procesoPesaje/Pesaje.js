@@ -14,7 +14,6 @@ import { Title } from "react-native-paper";
 import { useFormik } from "formik";
 import Autocomplete from "react-native-autocomplete-input";
 import FormularioTemporero from "./FormularioTemporero";
-import NfcScan from "./nfc/NfcScan";
 import firestore from "@react-native-firebase/firestore";
 import { db } from "../../api/firebase";
 import {
@@ -34,6 +33,7 @@ import { BleManager } from "react-native-ble-plx";
 import RNBluetoothClassic from "react-native-bluetooth-classic";
 import ConexionBalanza from "./ConexionBalanza";
 import { validateRut, formatRut, RutFormat } from "@fdograph/rut-utilities";
+import NfcManager from "react-native-nfc-manager";
 
 export default function Pesaje(props) {
   const { index, setIndex, user } = props;
@@ -68,7 +68,7 @@ export default function Pesaje(props) {
         .onSnapshot((querySnapshot) => {
           let bandejas = [];
           querySnapshot.forEach((doc) => {
-            if (doc.data().run !== user.run) {
+            if (doc.data().rut !== user.rut) {
               bandejas.push(doc.data());
             }
           });
@@ -78,21 +78,21 @@ export default function Pesaje(props) {
     return () => {
       componentMounted.current = false;
     };
-  }, [user.uid, user.cuid, user.rol, user.run]);
+  }, [user.uid, user.cuid, user.rol, user.rut]);
 
   useEffect(() => {
     if (componentMounted.current) {
       const cuid = user.rol === "company" ? user.uid : user.cuid;
       firestore()
-        .collection("users")
+        .collection("usuarios")
         .where("cuid", "==", cuid)
         .onSnapshot((querySnapshot) => {
           let temporeros = [];
           querySnapshot.forEach((doc) => {
             if (
-              doc.data().run !== user.run &&
+              doc.data().rut !== user.rut &&
               doc.data().rol === "harvester" &&
-              doc.data().isenabled === true
+              doc.data().habilitado === true
             ) {
               temporeros.push(doc.data());
             }
@@ -103,7 +103,7 @@ export default function Pesaje(props) {
     return () => {
       componentMounted.current = false;
     };
-  }, [user.uid, user.cuid, user.rol, user.run]);
+  }, [user.uid, user.cuid, user.rol, user.rut]);
 
   const disponible = async () => {
     try {
@@ -195,55 +195,53 @@ export default function Pesaje(props) {
 
   const formik = useFormik({
     initialValues: {
-      name: "",
-      run: "",
+      nombreTemporero: "",
+      rut: "",
       nombre: "bandeja 1.0 kg",
       id: "tk4lD384ZusDfSujkfv9",
       dcto: 1,
       cuid: "2TtPZcIEcnQLeLbiXmDf646QJcx1",
-      weight: "",
-      originalWeight: "",
+      peso: "",
+      pesoOriginal: "",
     },
   });
 
   const { values } = formik;
 
   const obtenerRegistros = (categoriaSelected) => {
-    const peso = isNaN(parseFloat(values.weight))
-      ? 0
-      : parseFloat(values.weight);
+    const peso = isNaN(parseFloat(values.peso)) ? 0 : parseFloat(values.peso);
     const vacio = {
-      acumulate: peso,
-      firstName: values.name.split(" ", 2)[0],
-      lastName: values.name.split(" ", 2)[1],
-      id: values.run,
-      lastDate: new Date(),
+      acumulado: peso,
+      nombreTemporero: values.nombreTemporero.split(" ", 2)[0],
+      apellidoTemporero: values.nombreTemporero.split(" ", 2)[1],
+      idRegistro: values.rut,
+      ultimoRegistro: new Date(),
     };
-    if (categoriaSelected.item.registers.length > 0) {
+    if (categoriaSelected.item.registros.length > 0) {
       //cambiar mi rut
-      const registro = categoriaSelected.item.registers.find(
-        (registers) => registers.id === values.run
+      const registro = categoriaSelected.item.registros.find(
+        (registros) => registros.idRegistro === values.rut
       );
       if (registro) {
-        console.log(registro.acumulate, "esto está acumulado");
+        console.log(registro.acumulado, "esto está acumulado");
         const nuevoRegistro = {
-          acumulate: registro.acumulate + peso,
-          firstName: values.name.split(" ", 2)[0],
-          lastName: values.name.split(" ", 2)[1],
-          id: values.run,
-          lastDate: new Date(),
+          acumulado: registro.acumulado + peso,
+          nombreTemporero: values.nombreTemporero.split(" ", 2)[0],
+          apellidoTemporero: values.nombreTemporero.split(" ", 2)[1],
+          idRegistro: values.rut,
+          ultimoRegistro: new Date(),
         };
-        const index = categoriaSelected.item.registers.indexOf(registro);
-        categoriaSelected.item.registers[index].acumulate =
-          registro.acumulate + peso;
+        const index = categoriaSelected.item.registros.indexOf(registro);
+        categoriaSelected.item.registros[index].acumulado =
+          registro.acumulado + peso;
 
         return nuevoRegistro;
       } else {
-        categoriaSelected.item.registers.push(vacio);
+        categoriaSelected.item.registros.push(vacio);
         return vacio;
       }
     } else {
-      categoriaSelected.item.registers.push(vacio);
+      categoriaSelected.item.registros.push(vacio);
       return vacio;
     }
   };
@@ -251,7 +249,7 @@ export default function Pesaje(props) {
   const validacionUsuario = () => {
     const isTemporero = temporeros.find(
       (temporero) =>
-        temporero.run === formatRut(values.run, RutFormat.DOTS_DASH)
+        temporero.rut === formatRut(values.rut, RutFormat.DOTS_DASH)
     );
     if (isTemporero !== undefined) return true;
     return false;
@@ -259,8 +257,12 @@ export default function Pesaje(props) {
 
   const guardar = async () => {
     setLoading(true);
-    if (values.name !== "" && values.run !== "" && values.weight !== "") {
-      if (!validateRut(values.run) || errorPeso) {
+    if (
+      values.nombreTemporero !== "" &&
+      values.rut !== "" &&
+      values.peso !== ""
+    ) {
+      if (!validateRut(values.rut) || errorPeso) {
         if (errorPeso) {
           setMessage("Peso no válido");
         } else {
@@ -277,23 +279,25 @@ export default function Pesaje(props) {
           const registro = obtenerRegistros(categoriaSelected);
 
           await firestore()
-            .collection("category/" + categoriaSelected.item.id + "/registers")
-            .doc(values.run)
+            .collection(
+              "categoria/" + categoriaSelected.item.idCategoria + "/registros"
+            )
+            .doc(values.rut)
             .set(registro);
 
           const data = {
-            category: categoriaSelected.item.id,
-            date: new Date(),
-            originalWeight: values.originalWeight,
-            weight: values.weight,
+            idCategoria: categoriaSelected.item.idCategoria,
+            fecha: new Date(),
+            pesoOriginal: values.pesoOriginal,
+            peso: values.peso,
           };
           await firestore()
             .collection(
-              "category/" +
-                categoriaSelected.item.id +
-                "/registers/" +
-                values.run +
-                "/workerRegisters"
+              "categoria/" +
+                categoriaSelected.item.idCategoria +
+                "/registros/" +
+                values.rut +
+                "/registrosTemporero"
             )
             .add(data);
 
@@ -309,6 +313,15 @@ export default function Pesaje(props) {
     }
   };
 
+  const lecturaNFC = async () => {
+    const NFCSupported = await NfcManager.isSupported();
+    if (NFCSupported) {
+      setMostrarLecturaNFC(true);
+    } else {
+      setMessage("El dispositivo no soporta NFC.");
+      setOpenSnackbar(true);
+    }
+  };
   return (
     <>
       <FlatList
@@ -347,7 +360,7 @@ export default function Pesaje(props) {
               /> */}
 
               <Button
-                onPress={() => setMostrarLecturaNFC(true)}
+                onPress={() => lecturaNFC()}
                 buttonStyle={styles.boton}
                 icon={
                   <Icon
@@ -376,7 +389,12 @@ export default function Pesaje(props) {
               errorPeso={errorPeso}
               setErrorPeso={setErrorPeso}
             />
-            <ConexionBalanza permiso={permiso} />
+            <ConexionBalanza
+              permiso={permiso}
+              setOpenSnackbar={setOpenSnackbar}
+              setMessage={setMessage}
+              formik={formik}
+            />
             <View style={{ alignItems: "center", marginTop: 10 }}>
               <Button
                 onPress={() => (loading ? null : guardar())}

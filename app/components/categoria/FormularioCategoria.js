@@ -11,7 +11,7 @@ export default function FormularioCategoria(props) {
   const [validateRutEmpleado, setValidateRutEmpleado] = useState(false);
   const [isValid, setIsValid] = useState(true);
   const [isPressed, setIsPressed] = useState(false);
-  const [date, setDate] = useState(new Date());
+  const [fecha, setFecha] = useState(new Date());
   const [mode, setMode] = useState("date");
   const [show, setShow] = useState(false);
   const [stringDate, setStringDate] = useState(formatDate(new Date()));
@@ -30,8 +30,8 @@ export default function FormularioCategoria(props) {
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setShow(false);
-    setDate(currentDate);
-    actualizarEstado(currentDate, "dateStart");
+    setFecha(currentDate);
+    actualizarEstado(currentDate, "fechaInicio");
     setStringDate(formatDate(currentDate));
   };
 
@@ -71,10 +71,10 @@ export default function FormularioCategoria(props) {
         style={styles.input}
         placeholderTextColor="gray"
         placeholder="Nombre"
-        onChangeText={(e) => actualizarEstado(e, "name")}
-        onBlur={handleBlur("name")}
+        onChangeText={(e) => actualizarEstado(e, "nombreCategoria")}
+        onBlur={handleBlur("nombreCategoria")}
         errorMessage={!nombreValido && "Nombre requerido"}
-        value={values.name}
+        value={values.nombreCategoria}
       />
 
       <Input
@@ -98,7 +98,7 @@ export default function FormularioCategoria(props) {
       {show && (
         <DateTimePicker
           testID="dateTimePicker"
-          value={date}
+          value={fecha}
           mode={mode}
           is24Hour={true}
           onChange={onChange}

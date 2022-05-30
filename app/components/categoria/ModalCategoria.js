@@ -13,8 +13,8 @@ export default function ModalCategoria(props) {
 
   const formik = useFormik({
     initialValues: {
-      name: "",
-      dateStart: new Date(),
+      nombreCategoria: "",
+      fechaInicio: new Date(),
     },
 
     onSubmit: () => guardarDatos(),
@@ -33,22 +33,22 @@ export default function ModalCategoria(props) {
 
   const guardarDatos = async () => {
     setLoading(true);
-    if (values.name !== "" && values.dateStart !== "") {
+    if (values.nombreCategoria !== "" && values.fechaInicio !== "") {
       setNombreValido(true);
       setFechaValida(true);
       const data = {
         ...values,
-        dateEnd: "",
+        fechaTermino: "",
         cuid: user.rol === "company" ? user.uid : user.cuid,
-        id: values.name,
+        idCategoria: values.nombreCategoria,
       };
       await firestore()
-        .collection("category")
+        .collection("categoria")
         .add(data)
         .then(async (e) => {
-          const info = { ...data, id: e.id };
+          const info = { ...data, idCategoria: e.id };
           await firestore()
-            .collection("category")
+            .collection("categoria")
             .doc(e.id)
             .set(info)
             .then(() => {
@@ -66,10 +66,10 @@ export default function ModalCategoria(props) {
         });
     } else {
       setLoading(false);
-      if (values.name === "") {
+      if (values.nombreCategoria === "") {
         setNombreValido(false);
       }
-      if (values.dateStart === "") {
+      if (values.fechaInicio === "") {
         setFechaValida(false);
       }
     }

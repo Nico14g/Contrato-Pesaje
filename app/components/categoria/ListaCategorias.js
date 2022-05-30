@@ -67,9 +67,9 @@ const options = {
   minute: "numeric",
 };
 
-const mostrarFechaTermino = (dateEnd) => {
-  if (dateEnd === "") return true;
-  return dateEnd.toDate().toLocaleDateString("es-CL", options);
+const mostrarFechaTermino = (fechaTermino) => {
+  if (fechaTermino === "") return true;
+  return fechaTermino.toDate().toLocaleDateString("es-CL", options);
 };
 
 function Categoria(props) {
@@ -85,18 +85,18 @@ function Categoria(props) {
         <View style={styles.viewContainer}>
           <View style={styles.colA}>
             <Text style={styles.nombreText}>
-              {categoria.item.name.substr(0, 17)}
+              {categoria.item.nombreCategoria.substr(0, 17)}
             </Text>
           </View>
           <View style={styles.colB}>
-            {mostrarFechaTermino(categoria.item.dateEnd) === true ? (
+            {mostrarFechaTermino(categoria.item.fechaTermino) === true ? (
               <Text style={styles.textoFecha}>En Progreso</Text>
             ) : (
               <Text style={styles.textoFecha}>
-                {categoria.item.dateStart
+                {categoria.item.fechaInicio
                   .toDate()
                   .toLocaleDateString("es-CL", options)}{" "}
-                - {mostrarFechaTermino(categoria.item.dateEnd)}
+                - {mostrarFechaTermino(categoria.item.fechaTermino)}
               </Text>
             )}
           </View>

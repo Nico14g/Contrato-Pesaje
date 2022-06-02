@@ -15,9 +15,19 @@ export default function FormularioPesaje(props) {
 
   const handleValueChange = (itemValue) => {
     setSelectedBandeja(itemValue);
+    console.log(itemValue);
     if (itemValue !== "") {
       const bandeja = bandejas.find((bandeja) => bandeja.id === itemValue);
+
       setValues({ ...values, ...bandeja });
+      console.log(parseFloat(values.pesoOriginal) >= 0);
+      if (parseFloat(values.pesoOriginal) >= 0) {
+        setValues({
+          ...values,
+          peso: parseFloat(values.pesoOriginal) - bandeja.dcto,
+        });
+      }
+
       setIsSelected(false);
     }
   };

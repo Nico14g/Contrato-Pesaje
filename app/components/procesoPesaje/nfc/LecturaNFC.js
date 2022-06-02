@@ -104,11 +104,11 @@ export default function LecturaNFC(props) {
             />
           </View>
           <Text h4 h4Style={{ fontSize: 16 }} style={{ marginTop: 30 }}>
-            Por favor Acerque el Teléfono a la Tarjeta NFC
+            Por favor acerque el teléfono a la tarjeta NFC
           </Text>
           {error && (
             <Text h4 h4Style={{ fontSize: 16 }} style={{ color: "red" }}>
-              Ha Ocurrido un error
+              Ha ocurrido un error
             </Text>
           )}
         </View>

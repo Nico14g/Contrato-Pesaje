@@ -1,27 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, Dimensions, Text, View } from "react-native";
-import { TextInput } from "react-native-paper";
-import Autocomplete from "react-native-autocomplete-input";
-import { Input, Icon, Button } from "react-native-elements";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, Dimensions, View } from "react-native";
+import { Icon, Button } from "react-native-elements";
 import { FormikProvider, useFormik } from "formik";
 import { Picker } from "@react-native-picker/picker";
-import RNBluetoothClassic, {
-  BluetoothDevice,
-  BluetoothEventType,
-  BluetoothDeviceReadEvent,
-} from "react-native-bluetooth-classic";
+import RNBluetoothClassic from "react-native-bluetooth-classic";
 import { request, PERMISSIONS } from "react-native-permissions";
 
 export default function ConexionBalanza(props) {
-  const { permiso, setOpenSnackbar, setMessage, formik } = props;
-  const componentMounted = useRef(true);
-  const [devices, setDevices] = useState([]);
+  const { permiso, setOpenSnackbar, setMessage, formik, valores } = props;
   const [pairedDevices, setPairedDevices] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState("");
   const [conectedDevice, setConectedDevice] = useState(false);
   const [device, setDevice] = useState("");
-  const [readSubscription, setReadSubscription] = useState("");
 
   const formikBalanza = useFormik({
     initialValues: {
@@ -75,44 +65,47 @@ export default function ConexionBalanza(props) {
     }
   };
 
-  const onReceivedData = async (data) => {
-    console.log(data);
-  };
-
   const recibirPeso = async (device) => {
-    console.log("conectado");
-    let messages = await device.available();
-    setReadSubscription(device.onDataReceived((data) => onReceivedData(data)));
-    if (messages.length > 0) {
-      let peso = await device.read();
-      setFieldValue("pesoOriginal", peso.data);
+    try {
+      let messages = await device.available();
+      if (messages > 0) {
+        let data;
+        while (messages > 10) {
+          data = await device.read();
+          messages--;
+        }
+        const pesoOriginal = data.replace(/\s/g, "").split("+", 2)[1];
+        setFieldValue("pesoOriginal", pesoOriginal.split("kg", 2)[0]);
+        if (valores.peso !== "") {
+          setFieldValue(
+            "peso",
+            parseFloat(pesoOriginal.split("kg", 2)[0]) - valores.dcto
+          );
+        }
 
-      setReadSubscription(
-        device.onDataReceived((data) => onReceivedData(data))
-      );
+        await device.clear();
+      }
+    } catch (e) {
+      console.log(e);
     }
   };
 
   const conectarDispositivo = async () => {
     console.log(selectedDevice, "SELECTED");
     try {
-      const estaConectado = await RNBluetoothClassic.getConnectedDevice(
-        selectedDevice
-      );
-      if (!estaConectado) {
-        const device = await RNBluetoothClassic.connectToDevice(selectedDevice);
-        const conected = await device.isConnected();
-        setConectedDevice(conected);
-        if (conected) {
-          setDevice(device);
-          recibirPeso(device);
-        } else {
-          setConectedDevice(false);
-          setMessage("Error al conectar con el dispositivo Bluetooth");
-          setOpenSnackbar(true);
-        }
-      } else {
+      const device = await RNBluetoothClassic.connectToDevice(selectedDevice, {
+        DELIMITER: "\n",
+        readTimeout: 1000,
+      });
+      const conected = await device.isConnected();
+      setConectedDevice(conected);
+      if (conected) {
+        setDevice(device);
         recibirPeso(device);
+      } else {
+        setConectedDevice(false);
+        setMessage("Error al conectar con el dispositivo Bluetooth");
+        setOpenSnackbar(true);
       }
     } catch (e) {
       console.log(e);
@@ -189,14 +182,14 @@ const styles = StyleSheet.create({
   },
 
   boton: {
-    width: Dimensions.get("window").width * 0.32,
+    width: Dimensions.get("window").width * 0.3,
     height: 46,
     backgroundColor: "#99c781",
     borderColor: "#3f9d2f",
     shadowOffset: { width: -1, height: 3 },
     shadowRadius: 4,
     shadowColor: "gray",
-    marginLeft: 10,
+    marginLeft: 20,
     marginTop: 10,
   },
   containerTextFields: {

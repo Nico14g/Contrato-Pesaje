@@ -48,8 +48,7 @@ export default function Pesaje(props) {
   const [permiso, setPermiso] = useState(false);
   const [errorPeso, setErrorPeso] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [device, setDevice] = useState(null);
-  const manager = new BleManager();
+  const [loadingTCosecha, setLoadingTCosecha] = useState(false);
 
   const STORAGE_KEY = "@categoriaSelect";
 
@@ -322,6 +321,28 @@ export default function Pesaje(props) {
       setOpenSnackbar(true);
     }
   };
+
+  const terminarCosecha = async () => {
+    setLoadingTCosecha(true);
+    const categoria = {
+      cuid: categoriaSelected.item.cuid,
+      fechaInicio: new Date(
+        categoriaSelected.item.fechaInicio.seconds * 1000 +
+          categoriaSelected.item.fechaInicio.nanoseconds / 1000000
+      ),
+      fechaTermino: new Date(),
+      idCategoria: categoriaSelected.item.idCategoria,
+      nombreCategoria: categoriaSelected.item.nombreCategoria,
+    };
+
+    await firestore()
+      .collection("categoria")
+      .doc(categoriaSelected.item.idCategoria)
+      .set(categoria);
+    setLoadingTCosecha(false);
+    setMessage("Cosecha: " + categoria.nombreCategoria + " terminada.");
+    setOpenSnackbar(true);
+  };
   return (
     <>
       <FlatList
@@ -394,6 +415,7 @@ export default function Pesaje(props) {
               setOpenSnackbar={setOpenSnackbar}
               setMessage={setMessage}
               formik={formik}
+              valores={values}
             />
             <View style={{ alignItems: "center", marginTop: 10 }}>
               <Button
@@ -412,6 +434,26 @@ export default function Pesaje(props) {
                 loading={loading}
               />
             </View>
+            {user.rol !== "planner" &&
+              categoriaSelected.item.fechaTermino === "" && (
+                <View style={styles.wrapper}>
+                  <Button
+                    mode="contained"
+                    color="blue"
+                    icon={
+                      <Icon
+                        type="material-community"
+                        name="calendar-check"
+                        size={20}
+                        color="white"
+                      />
+                    }
+                    title="  Finalizar Cosecha"
+                    loading={loadingTCosecha}
+                    onPress={() => (loadingTCosecha ? null : terminarCosecha())}
+                  ></Button>
+                </View>
+              )}
           </>
         }
       />
@@ -452,7 +494,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     alignItems: "flex-start",
     maxHeight: "8%",
-    marginTop: 20,
+    marginTop: 10,
   },
 
   containerButtons: {
@@ -493,5 +535,8 @@ const styles = StyleSheet.create({
   },
   inputSearchBar: {
     backgroundColor: "#ffffff",
+  },
+  wrapper: {
+    width: Dimensions.get("window").width,
   },
 });

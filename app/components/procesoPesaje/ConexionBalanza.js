@@ -81,6 +81,7 @@ export default function ConexionBalanza(props) {
             "peso",
             parseFloat(pesoOriginal.split("kg", 2)[0]) - valores.dcto
           );
+          setFieldValue("bluetooth", true);
         }
 
         await device.clear();

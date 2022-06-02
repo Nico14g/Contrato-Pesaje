@@ -43,11 +43,13 @@ export default function FormularioPesaje(props) {
         setValues({
           ...values,
           peso: parseFloat(str) - values.dcto,
+          bluetooth: false,
         });
       } else {
         setValues({
           ...values,
           peso: "",
+          bluetooth: false,
         });
       }
     }

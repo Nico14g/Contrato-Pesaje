@@ -1,35 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  View,
-  StyleSheet,
-  Dimensions,
-  ScrollView,
-  FlatList,
-  PermissionsAndroid,
-} from "react-native";
+import { View, StyleSheet, Dimensions, FlatList } from "react-native";
 import { readData } from "../../utilidades/variablesGlobales";
 import { request, PERMISSIONS } from "react-native-permissions";
 import { Icon, Button, Text, Divider } from "react-native-elements";
 import { Title } from "react-native-paper";
 import { useFormik } from "formik";
-import Autocomplete from "react-native-autocomplete-input";
 import FormularioTemporero from "./FormularioTemporero";
 import firestore from "@react-native-firebase/firestore";
-import { db } from "../../api/firebase";
-import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-  doc,
-  setDoc,
-  addDoc,
-} from "firebase/firestore";
 import FormularioPesaje from "./FormularioPesaje";
 import LecturaNFC from "./nfc/LecturaNFC";
 import ModalEnlace from "./ModalEnlace";
 import { SnackBar } from "../../utilidades/Snackbar";
-import { BleManager } from "react-native-ble-plx";
 import RNBluetoothClassic from "react-native-bluetooth-classic";
 import ConexionBalanza from "./ConexionBalanza";
 import { validateRut, formatRut, RutFormat } from "@fdograph/rut-utilities";
@@ -202,6 +183,7 @@ export default function Pesaje(props) {
       cuid: "2TtPZcIEcnQLeLbiXmDf646QJcx1",
       peso: "",
       pesoOriginal: "",
+      bluetooth: false,
     },
   });
 
@@ -289,6 +271,7 @@ export default function Pesaje(props) {
             fecha: new Date(),
             pesoOriginal: values.pesoOriginal,
             peso: values.peso,
+            bluetooth: values.bluetooth,
           };
           await firestore()
             .collection(
@@ -435,7 +418,7 @@ export default function Pesaje(props) {
               />
             </View>
             {user.rol !== "planner" &&
-              categoriaSelected.item.fechaTermino === "" && (
+              categoriaSelected?.item?.fechaTermino === "" && (
                 <View style={styles.wrapper}>
                   <Button
                     mode="contained"

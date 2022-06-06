@@ -438,7 +438,7 @@ export const FormularioAutocompleteEmpleado = (props) => {
         setSelectedYear={setSelectedYear}
         since={1960}
         to={2007}
-        width={"103%"}
+        width={"100%"}
       />
     </View>
   );

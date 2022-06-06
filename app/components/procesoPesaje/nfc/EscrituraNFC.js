@@ -129,10 +129,7 @@ export default function EscrituraNFC(props) {
   return (
     <>
       <View style={styles.wrapper}>
-        <BottomSheet
-          isVisible={mostrarEscrituraNFC}
-          //containerStyle={{ backgroundColor: 'rgba(0.5, 0.25, 0, 0.2)' }}
-        >
+        <BottomSheet isVisible={mostrarEscrituraNFC}>
           <View
             style={{
               backgroundColor: "white",

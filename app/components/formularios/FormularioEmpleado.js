@@ -186,7 +186,7 @@ export const FormularioEmpleado = (props) => {
               setSelectedYear={setSelectedYear}
               since={1960}
               to={2007}
-              width="90%"
+              width="100%"
             />
           </ScrollView>
         ) : (
@@ -198,7 +198,6 @@ export const FormularioEmpleado = (props) => {
             }
           >
             <FlatList
-              // other FlatList props
               keyboardShouldPersistTaps="always"
               data={[]}
               ListFooterComponent={

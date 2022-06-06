@@ -87,39 +87,10 @@ export default function Pesaje(props) {
 
   const disponible = async () => {
     try {
-      request(PERMISSIONS.ANDROID.BLUETOOTH_CONNECT).then(async (result) => {
-        if (result === "granted") {
-          if (await RNBluetoothClassic.isBluetoothAvailable()) {
-            const enabled = await RNBluetoothClassic.isBluetoothEnabled();
-
-            if (enabled) {
-              setPermiso(true);
-            } else {
-              setPermiso(false);
-              setMessage(
-                "Por Favor Active el Bluetooth Para Recibir los Datos de la Balanza"
-              );
-              setOpenSnackbar(true);
-            }
-          } else {
-            setPermiso(false);
-            setMessage("El dispositivo no es compatible con Bluetooth.");
-            setOpenSnackbar(true);
-          }
-        } else {
-          setPermiso(false);
-        }
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  useEffect(() => {
-    if (componentMounted.current) {
-      RNBluetoothClassic.onStateChanged(async (state) => {
-        if (state.enabled === true) {
-          disponible();
+      if (await RNBluetoothClassic.isBluetoothAvailable()) {
+        const enabled = await RNBluetoothClassic.isBluetoothEnabled();
+        if (enabled) {
+          setPermiso(true);
         } else {
           setPermiso(false);
           setMessage(
@@ -127,20 +98,32 @@ export default function Pesaje(props) {
           );
           setOpenSnackbar(true);
         }
-      });
+      } else {
+        setPermiso(false);
+        setMessage("El dispositivo no es compatible con Bluetooth.");
+        setOpenSnackbar(true);
+      }
+    } catch (err) {
+      console.log(err);
     }
-    return () => {
-      componentMounted.current = false;
-    };
-  }, []);
+  };
+
+  useEffect(() => {
+    RNBluetoothClassic.onStateChanged(async (state) => {
+      if (state.enabled === true) {
+        disponible();
+      } else {
+        setPermiso(false);
+        setMessage(
+          "Por Favor Active el Bluetooth Para Recibir los Datos de la Balanza"
+        );
+        setOpenSnackbar(true);
+      }
+    });
+  }, [RNBluetoothClassic.onStateChanged]);
 
   useEffect(() => {
     disponible();
-    // const hola = async () => {
-    //   const e = await RNBluetoothClassic.getBondedDevices();
-    //   console.log(e, "esto es e");
-    // };
-    // hola();
   }, []);
 
   // useEffect(() => {
@@ -177,9 +160,9 @@ export default function Pesaje(props) {
     initialValues: {
       nombreTemporero: "",
       rut: "",
-      nombre: "bandeja 1.0 kg",
-      id: "tk4lD384ZusDfSujkfv9",
-      dcto: 1,
+      nombre: "",
+      id: "",
+      dcto: 0,
       cuid: "2TtPZcIEcnQLeLbiXmDf646QJcx1",
       peso: "",
       pesoOriginal: "",
@@ -329,7 +312,6 @@ export default function Pesaje(props) {
   return (
     <>
       <FlatList
-        // other FlatList props
         keyboardShouldPersistTaps="always"
         data={[]}
         ListFooterComponent={
@@ -345,24 +327,9 @@ export default function Pesaje(props) {
               color={"blue"}
               style={{ alignItems: "center" }}
             >
-              <Title>Información del Empleado</Title>
+              <Title style={{ fontSize: 18 }}>Información del Empleado</Title>
             </Divider>
             <View style={styles.containerButtons}>
-              {/* <Button
-                onPress={() => setMostrarEnlaceNFC(true)}
-                buttonStyle={styles.boton}
-                icon={
-                  <Icon
-                    type="material-community"
-                    name="nfc"
-                    size={20}
-                    color="white"
-                  />
-                }
-                titleStyle={{ fontSize: 14 }}
-                title=" Enlazar Temporero"
-              /> */}
-
               <Button
                 onPress={() => lecturaNFC()}
                 buttonStyle={styles.boton}
@@ -385,7 +352,7 @@ export default function Pesaje(props) {
               color={"blue"}
               style={{ alignItems: "center" }}
             >
-              <Title>Información del Pesaje</Title>
+              <Title style={{ fontSize: 18 }}>Información del Pesaje</Title>
             </Divider>
             <FormularioPesaje
               formik={formik}

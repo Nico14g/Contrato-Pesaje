@@ -31,7 +31,6 @@
     },
     "plugins": [
       "@react-native-firebase/app",
-      "@config-plugins/react-native-ble-plx",
       "react-native-nfc-manager",
 
       [

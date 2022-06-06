@@ -214,7 +214,6 @@ export const FormularioEmpresa = (props) => {
             }
           >
             <FlatList
-              // other FlatList props
               keyboardShouldPersistTaps="always"
               data={[]}
               ListFooterComponent={

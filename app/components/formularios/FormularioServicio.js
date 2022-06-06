@@ -180,7 +180,6 @@ export const FormularioServicio = (props) => {
             }
           >
             <FlatList
-              // other FlatList props
               keyboardShouldPersistTaps="always"
               data={[]}
               ListFooterComponent={

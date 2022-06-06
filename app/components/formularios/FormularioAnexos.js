@@ -172,7 +172,7 @@ export const FormularioAnexos = (props) => {
                 setSelectedYear={setSelectedYear}
                 since={new Date().getFullYear()}
                 to={new Date().getFullYear() + 1}
-                width="90%"
+                width="100%"
               />
             </View>
 
@@ -234,11 +234,10 @@ export const FormularioAnexos = (props) => {
             style={
               keyboard.keyboardShown
                 ? { maxHeight: "50%" }
-                : { maxHeight: "70%" }
+                : { maxHeight: "65%" }
             }
           >
             <FlatList
-              // other FlatList props
               keyboardShouldPersistTaps="always"
               data={[]}
               ListFooterComponent={

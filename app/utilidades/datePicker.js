@@ -112,18 +112,18 @@ export const MonthPicker = (props) => {
       onValueChange={(itemValue, itemIndex) => setSelectedMonth(itemValue)}
       mode="dropdown"
     >
-      <Picker.Item label="Enero" value={"01"} />
-      <Picker.Item label="Febrero" value={"02"} />
-      <Picker.Item label="Marzo" value={"03"} />
-      <Picker.Item label="Abril" value={"04"} />
-      <Picker.Item label="Mayo" value={"05"} />
-      <Picker.Item label="Junio" value={"06"} />
-      <Picker.Item label="Julio" value={"07"} />
-      <Picker.Item label="Agosto" value={"08"} />
-      <Picker.Item label="Septiembre" value={"09"} />
-      <Picker.Item label="Octubre" value={"10"} />
-      <Picker.Item label="Noviembre" value={"11"} />
-      <Picker.Item label="Diciembre" value={"12"} />
+      <Picker.Item label="01" value={"01"} />
+      <Picker.Item label="02" value={"02"} />
+      <Picker.Item label="03" value={"03"} />
+      <Picker.Item label="04" value={"04"} />
+      <Picker.Item label="05" value={"05"} />
+      <Picker.Item label="06" value={"06"} />
+      <Picker.Item label="07" value={"07"} />
+      <Picker.Item label="08" value={"08"} />
+      <Picker.Item label="09" value={"09"} />
+      <Picker.Item label="10" value={"10"} />
+      <Picker.Item label="11" value={"11"} />
+      <Picker.Item label="12" value={"12"} />
     </Picker>
   );
 };
@@ -158,13 +158,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     alignSelf: "center",
-    marginLeft: "3%",
+    marginLeft: "6%",
   },
   viewContainer2: {
     flexDirection: "row",
     alignItems: "flex-start",
     alignSelf: "center",
-    marginLeft: "3%",
+    marginLeft: "4%",
   },
   colA: {
     borderRadius: 7,
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     borderColor: "lightgrey",
     backgroundColor: "white",
     marginRight: 2,
-    width: "27%",
+    width: "28%",
   },
   colB: {
     borderRadius: 7,
@@ -180,14 +180,14 @@ const styles = StyleSheet.create({
     borderColor: "lightgrey",
     backgroundColor: "white",
     marginRight: 2,
-    width: "35%",
+    width: "28%",
   },
   colC: {
     borderRadius: 7,
     borderWidth: 1,
     borderColor: "lightgrey",
     backgroundColor: "white",
-    width: "32%",
+    width: "35%",
   },
   title: {
     alignSelf: "center",

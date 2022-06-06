@@ -78,10 +78,7 @@ export default function LecturaNFC(props) {
 
   return (
     <View style={styles.wrapper}>
-      <BottomSheet
-        isVisible={mostrarLecturaNFC}
-        //containerStyle={{ backgroundColor: 'rgba(0.5, 0.25, 0, 0.2)' }}
-      >
+      <BottomSheet isVisible={mostrarLecturaNFC}>
         <View
           style={{
             backgroundColor: "white",

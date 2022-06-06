@@ -72,8 +72,6 @@ export const FormularioAutocompleteEmpresa = (props) => {
   };
 
   return (
-    // <ScrollView horizontal={false} style={styles.ScrollViewA}>
-    //   <ScrollView horizontal={true} style={styles.ScrollViewB}>
     <View style={styles.scrollView}>
       <Autocomplete
         style={styles.autoComplete}
@@ -443,8 +441,6 @@ export const FormularioAutocompleteEmpresa = (props) => {
         }}
       />
     </View>
-    //   </ScrollView>
-    // </ScrollView>
   );
 };
 
@@ -485,23 +481,3 @@ const styles = StyleSheet.create({
     maxWidth: "90%",
   },
 });
-/*
-        flatListProps={{
-          keyExtractor: (_, idx) => idx,
-          renderItem: ({ item }) => (
-            <TouchableOpacity 
-              onPress={() => {
-                console.log(item);
-                setEmpresa({ ...empresa, razonSocial: item });
-                //setOptions({
-                //  ...options,
-                //  razonSocial: [],
-                //});
-                //setHideResults({ ...hideResults, razonSocial: true });
-              }}
-            >
-              <Text>{item}</Text>
-            </TouchableOpacity>
-          ),
-        }}
-*/

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Dimensions, View } from "react-native";
+import { StyleSheet, Dimensions, View, Platform } from "react-native";
 import { Icon, Button } from "react-native-elements";
 import { FormikProvider, useFormik } from "formik";
 import { Picker } from "@react-native-picker/picker";
@@ -11,7 +11,7 @@ export default function ConexionBalanza(props) {
   const [pairedDevices, setPairedDevices] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState("");
   const [conectedDevice, setConectedDevice] = useState(false);
-  const [device, setDevice] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const formikBalanza = useFormik({
     initialValues: {
@@ -23,26 +23,31 @@ export default function ConexionBalanza(props) {
 
   const { setFieldValue } = formik;
 
-  const getDeviceName = () => {
-    console.log(permiso, "permiso");
+  const getPairedDevices = async () => {
+    Promise.resolve(RNBluetoothClassic.getBondedDevices()).then((paired) => {
+      setPairedDevices(paired);
+      if (paired.length > 0) {
+        setSelectedDevice(paired[0].id);
+        values.name = paired[0].name;
+        values.id = paired[0].id;
+      } else {
+        values.name = "";
+        values.id = "";
+      }
+    });
+  };
+  const getDeviceName = async () => {
     if (permiso) {
-      request(PERMISSIONS.ANDROID.BLUETOOTH_CONNECT).then(async (result) => {
-        if (result === "granted") {
-          Promise.resolve(RNBluetoothClassic.getBondedDevices()).then(
-            (paired) => {
-              setPairedDevices(paired);
-              if (paired.length > 0) {
-                setSelectedDevice(paired[0].id);
-                values.name = paired[0].name;
-                values.id = paired[0].id;
-              } else {
-                values.name = "";
-                values.id = "";
-              }
-            }
-          );
-        }
-      });
+      const OsVer = Platform.constants["Release"];
+      if (OsVer >= 12) {
+        request(PERMISSIONS.ANDROID.BLUETOOTH_CONNECT).then(async (result) => {
+          if (result === "granted") {
+            await getPairedDevices();
+          }
+        });
+      } else {
+        await getPairedDevices();
+      }
     } else {
       values.name = "";
       values.id = "";
@@ -69,47 +74,60 @@ export default function ConexionBalanza(props) {
     try {
       let messages = await device.available();
       if (messages > 0) {
-        let data;
+        let data = await device.read();
         while (messages > 10) {
           data = await device.read();
           messages--;
         }
         const pesoOriginal = data.replace(/\s/g, "").split("+", 2)[1];
         setFieldValue("pesoOriginal", pesoOriginal.split("kg", 2)[0]);
-        if (valores.peso !== "") {
-          setFieldValue(
-            "peso",
-            parseFloat(pesoOriginal.split("kg", 2)[0]) - valores.dcto
-          );
-          setFieldValue("bluetooth", true);
-        }
+        setFieldValue(
+          "peso",
+          parseFloat(pesoOriginal.split("kg", 2)[0]) - valores.dcto
+        );
+        setFieldValue("bluetooth", true);
 
         await device.clear();
+      } else {
+        recibirPeso(device);
       }
+      setLoading(false);
     } catch (e) {
       console.log(e);
     }
   };
 
   const conectarDispositivo = async () => {
-    console.log(selectedDevice, "SELECTED");
     try {
-      const device = await RNBluetoothClassic.connectToDevice(selectedDevice, {
-        DELIMITER: "\n",
-        readTimeout: 1000,
-      });
-      const conected = await device.isConnected();
-      setConectedDevice(conected);
-      if (conected) {
-        setDevice(device);
-        recibirPeso(device);
+      setLoading(true);
+      const enabled = await RNBluetoothClassic.isBluetoothEnabled();
+      if (enabled) {
+        const device = await RNBluetoothClassic.connectToDevice(
+          selectedDevice,
+          {
+            DELIMITER: "\n",
+          }
+        );
+        const conected = await device.isConnected();
+        setConectedDevice(conected);
+        if (conected) {
+          const peso = await recibirPeso(device);
+        } else {
+          setLoading(false);
+          setConectedDevice(false);
+          setMessage("Error al conectar con el dispositivo Bluetooth");
+          setOpenSnackbar(true);
+        }
       } else {
-        setConectedDevice(false);
-        setMessage("Error al conectar con el dispositivo Bluetooth");
+        setLoading(false);
+        setMessage(
+          "Por Favor Active el Bluetooth Para Recibir los Datos de la Balanza"
+        );
         setOpenSnackbar(true);
       }
     } catch (e) {
       console.log(e);
+      setLoading(false);
       setConectedDevice(false);
       setMessage("Error al conectar con el dispositivo Bluetooth");
       setOpenSnackbar(true);
@@ -151,6 +169,7 @@ export default function ConexionBalanza(props) {
           }
           titleStyle={{ fontSize: 14 }}
           title=" Recibir Peso"
+          loading={loading}
         />
       </View>
     </FormikProvider>

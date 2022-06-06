@@ -45,24 +45,6 @@ export default function Empresa(props) {
     };
   }, []);
 
-  // const consulta = async () => {
-  //   try {
-  //     let data = [];
-  //     getDocs(collection(db, "Empresa")).then((documentos) => {
-  //       documentos.docs.forEach((doc) => data.push(doc.data()));
-  //       setEmpresas(data);
-  //     });
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // };
-
-  /*let data = [];
-      const querySnapshot = await getDocs(collection(db, "Empresa"));
-      querySnapshot.forEach((doc) => {
-        data.push(doc.data());
-      });
-      setEmpresas(data); */
   return (
     <>
       <TituloSwitch
@@ -80,18 +62,3 @@ export default function Empresa(props) {
     </>
   );
 }
-
-/*<View style={styles.container}>
-        <View style={styles.item}>
-          <Text style={styles.subtitulo}>Datos Empresa</Text>
-        </View>
-        <View style={styles.nuevo}>
-          <Switch
-            thumbColor="#f4f3f4"
-            ios_backgroundColor="#3e3e3e"
-            onValueChange={() => toggleSwitch()}
-            value={isEnabled}
-          />
-          <Text>Existente</Text>
-        </View>
-      </View>*/

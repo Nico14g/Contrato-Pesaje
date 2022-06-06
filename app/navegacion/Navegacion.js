@@ -41,7 +41,6 @@ export default function Navigation() {
                 screenOptions(focused, route, color),
               tabBarActiveTintColor: "#2f3bc7",
               tabBarInactiveTintColor: "#787878",
-              //color secundario 99c781
               headerShown: false,
             })}
           >
@@ -72,7 +71,6 @@ export default function Navigation() {
                 screenOptions(focused, route, color),
               tabBarActiveTintColor: "#2f3bc7",
               tabBarInactiveTintColor: "#787878",
-              //color secundario 99c781
               headerShown: false,
             })}
           >

@@ -76,7 +76,6 @@ export default function EdicionContrato(props) {
       setDatosEmpleado(values[2]);
       setDatosServicio(values[3]);
       setDatosAnexos(values[4]);
-      console.log(values[6], "firmas");
       setFirmas(values[6]);
       values[5] === null ? null : setContratosCreados(values[5]);
       guardar(
@@ -130,7 +129,6 @@ export default function EdicionContrato(props) {
     datosAnexos,
     firmas
   ) => {
-    console.log(firmas.firmaEmpleador);
     return {
       direccionEmpresa: datosEmpresa.direccion,
       dia: new Date().toUTCString().split(" ", 4)[1],
@@ -256,7 +254,6 @@ export default function EdicionContrato(props) {
       let document = Buffer.from(content, "base64");
 
       const zip = new PizZip(document);
-      console.log("asdasdas");
       var imageModule = new ImageModule(imageOpts);
       const doc = new Docxtemplater(zip, {
         modules: [imageModule],
@@ -282,7 +279,6 @@ export default function EdicionContrato(props) {
 
       const htmlResult = await convertToHtml({ arrayBuffer: buf });
 
-      console.log("entro acaccaacac");
       setHtml(htmlResult.value);
 
       subirStorage(doc, datosEmpleado);
@@ -299,29 +295,29 @@ export default function EdicionContrato(props) {
     const buffer = Buffer.from(new Uint8Array(buf));
 
     let documento = Buffer.from(buffer).toString("base64");
-    console.log(plantilla.item);
+    // console.log(plantilla.item);
 
-    const preHtml =
-      "<!DOCTYPE html PUBLIC `-//W3C//DTD XHTML 1.0 Transitional//EN` `http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd`> <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta http-equiv=`Content-Type` content=`text/html; charset=utf-8` /> <title>Export HTML To Doc</title></head><body>";
-    const postHtml = "</body></html>";
+    // const preHtml =
+    //   "<!DOCTYPE html PUBLIC `-//W3C//DTD XHTML 1.0 Transitional//EN` `http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd`> <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta http-equiv=`Content-Type` content=`text/html; charset=utf-8` /> <title>Export HTML To Doc</title></head><body>";
+    // const postHtml = "</body></html>";
 
-    const newHTML = preHtml + html + postHtml;
+    // const newHTML = preHtml + html + postHtml;
 
-    let documentob = Buffer.from(newHTML).toString("base64");
+    // let documentob = Buffer.from(newHTML).toString("base64");
 
-    await FileSystem.writeAsStringAsync(
-      FileSystem.documentDirectory + datosEmpleado.rut + ".docx",
-      documentob,
-      {
-        encoding: FileSystem.EncodingType.Base64,
-      }
-    );
-    RNFetchBlob.fs.mv(
-      FileSystem.documentDirectory.replace("file://", "") +
-        datosEmpleado.rut +
-        ".docx",
-      RNFetchBlob.fs.dirs.DownloadDir + "/" + datosEmpleado.rut + ".docx"
-    );
+    // await FileSystem.writeAsStringAsync(
+    //   FileSystem.documentDirectory + datosEmpleado.rut + ".docx",
+    //   documentob,
+    //   {
+    //     encoding: FileSystem.EncodingType.Base64,
+    //   }
+    // );
+    // RNFetchBlob.fs.mv(
+    //   FileSystem.documentDirectory.replace("file://", "") +
+    //     datosEmpleado.rut +
+    //     ".docx",
+    //   RNFetchBlob.fs.dirs.DownloadDir + "/" + datosEmpleado.rut + ".docx"
+    // );
     // const folder = await FileSystem.getInfoAsync(
     //   FileSystem.documentDirectory + "Contratos/"
     // );
@@ -351,7 +347,6 @@ export default function EdicionContrato(props) {
     let { status } = await MediaLibrary.requestPermissionsAsync();
     if (status === "granted") {
       try {
-        console.log(RNFetchBlob.fs.dirs.DownloadDir);
         const a = await FileSystem.writeAsStringAsync(documenturi, documento, {
           encoding: FileSystem.EncodingType.Base64,
         });
@@ -381,9 +376,12 @@ export default function EdicionContrato(props) {
                 datosEmpleado.rut +
                 ".docx",
             };
+            const contratos = contratosCreados.filter(
+              (contrato) => contrato.fileName !== uri.fileName
+            );
 
-            setContratosCreados((contratos) => [...contratos, uri]);
-            storeData([...contratosCreados, uri], CONTRATOS_KEY);
+            setContratosCreados([...contratos, uri]);
+            storeData([...contratos, uri], CONTRATOS_KEY);
             Promise.resolve(readData(CONTRATOS_KEY)).then((data) =>
               data === null ? null : setContratosCreados(data)
             );
@@ -508,23 +506,6 @@ export default function EdicionContrato(props) {
                   disabled={true}
                 />
               </ScrollView>
-              {/* <RichToolbar
-                style={{ marginBottom: 30 }}
-                editor={richText}
-                actions={[
-                  actions.insertImage,
-                  actions.setBold,
-                  actions.setItalic,
-                  actions.setUnderline,
-                  actions.heading1,
-                ]}
-                onPressAddImage={() => agregarFirma()}
-                iconMap={{
-                  [actions.heading1]: ({ tintColor }) => (
-                    <Text style={[{ color: tintColor }]}>H1</Text>
-                  ),
-                }}
-              /> */}
             </View>
             {open && (
               <SnackBar open={open} setOpen={setOpen} message={message} />
@@ -550,34 +531,6 @@ export default function EdicionContrato(props) {
           </>
         )}
       </View>
-      {/* <View style={{ height: "90%" }}>
-        <ScrollView>
-          <KeyboardAvoidingView>
-            <RichEditor
-              ref={richText}
-              initialContentHTML={html}
-              disabled={true}
-              onChange={(texto) => console.log(texto, "texto")}
-            />
-          </KeyboardAvoidingView>
-        </ScrollView>
-      </View> */}
-      {/* <KeyboardAvoidingView
-        style={keyboard.keyboardShown && { flex: 1, margin: 7 }}
-      >
-        <RichToolbar
-          style={{ marginBottom: 30 }}
-          editor={richText}
-          actions={["share", "save"]}
-          iconMap={{
-            //share-variant
-            share: Share,
-            save: Save,
-          }}
-          share={() => compartir()}
-          save={() => compartir()}
-        />
-      </KeyboardAvoidingView> */}
     </SafeAreaView>
   );
 }

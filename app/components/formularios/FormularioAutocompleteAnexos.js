@@ -283,9 +283,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     alignContent: "center",
-    alignItems: "center",
-    alignSelf: "center",
-    maxWidth: "90%",
+
     marginBottom: 30,
   },
 });

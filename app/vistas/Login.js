@@ -9,7 +9,7 @@ export default function Login() {
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(false);
 
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(true);
 
   function passwordValidator(password) {
     if (!password) return "La contraseña es requerida";

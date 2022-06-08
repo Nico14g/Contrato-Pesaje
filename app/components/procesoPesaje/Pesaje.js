@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, StyleSheet, Dimensions, FlatList } from "react-native";
 import { readData } from "../../utilidades/variablesGlobales";
-import { request, PERMISSIONS } from "react-native-permissions";
 import { Icon, Button, Text, Divider } from "react-native-elements";
 import { Title } from "react-native-paper";
 import { useFormik } from "formik";
@@ -17,7 +16,7 @@ import { validateRut, formatRut, RutFormat } from "@fdograph/rut-utilities";
 import NfcManager from "react-native-nfc-manager";
 
 export default function Pesaje(props) {
-  const { index, setIndex, user } = props;
+  const { index, user } = props;
   const [categoriaSelected, setCategoriaSelected] = useState("");
   const componentMounted = useRef(true);
   const [bandejas, setBandejas] = useState([]);
@@ -126,36 +125,6 @@ export default function Pesaje(props) {
     disponible();
   }, []);
 
-  // useEffect(() => {
-  //   request(PERMISSIONS.ANDROID.BLUETOOTH_SCAN)
-  //     .then((result) => {
-  //       if (result === "granted") {
-  //         manager.startDeviceScan(null, null, (error, device) => {
-  //           if (error) {
-  //             console.log(error);
-  //             // Handle error (scanning will be stopped automatically)
-  //             return;
-  //           }
-  //           console.log("device.name: " + device.name);
-  //           // Check if it is a device you are looking for based on advertisement data
-  //           // or other criteria.
-  //           if (
-  //             device.name === "TI BLE Sensor Tag" ||
-  //             device.name === "SensorTag"
-  //           ) {
-  //             // Stop scanning as it's not necessary if you are scanning for one device.
-  //             manager.stopDeviceScan();
-  //             // Proceed with connection.
-  //           }
-  //         });
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //       // …
-  //     });
-  // }, [manager]);
-
   const formik = useFormik({
     initialValues: {
       nombreTemporero: "",
@@ -224,7 +193,9 @@ export default function Pesaje(props) {
     if (
       values.nombreTemporero !== "" &&
       values.rut !== "" &&
-      values.peso !== ""
+      values.peso !== "" &&
+      parseFloat(values.peso) > 0 &&
+      categoriaSelected.item.fechaTermino === ""
     ) {
       if (!validateRut(values.rut) || errorPeso) {
         if (errorPeso) {
@@ -272,8 +243,17 @@ export default function Pesaje(props) {
         }
       }
     } else {
+      if (parseFloat(values.peso) <= 0) {
+        setMessage("Peso negativo o 0");
+      } else {
+        if (categoriaSelected.item.fechaTermino !== "") {
+          setMessage("La cosecha ya ha terminado");
+        } else {
+          setMessage("Falta información por completar");
+        }
+      }
       setLoading(false);
-      setMessage("Falta información por completar");
+
       setOpenSnackbar(true);
     }
   };
@@ -307,6 +287,7 @@ export default function Pesaje(props) {
       .set(categoria);
     setLoadingTCosecha(false);
     setMessage("Cosecha: " + categoria.nombreCategoria + " terminada.");
+    categoriaSelected.item.fechaTermino = new Date();
     setOpenSnackbar(true);
   };
   return (
@@ -360,6 +341,7 @@ export default function Pesaje(props) {
               errorPeso={errorPeso}
               setErrorPeso={setErrorPeso}
             />
+
             <ConexionBalanza
               permiso={permiso}
               setOpenSnackbar={setOpenSnackbar}

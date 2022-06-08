@@ -28,7 +28,6 @@ export default function Empresa(props) {
             id.push(doc.id);
           });
           setEmpresas(data);
-          console.log(data);
           setIdEmpresas(id);
         });
       // getDocs(collection(db, "Empresa")).then((documentos) => {

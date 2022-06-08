@@ -10,7 +10,6 @@ export default function ConexionBalanza(props) {
   const { permiso, setOpenSnackbar, setMessage, formik, valores } = props;
   const [pairedDevices, setPairedDevices] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState("");
-  const [conectedDevice, setConectedDevice] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const formikBalanza = useFormik({
@@ -70,6 +69,10 @@ export default function ConexionBalanza(props) {
     }
   };
 
+  function roundToTwo(num) {
+    return +(Math.round(num + "e+2") + "e-2");
+  }
+
   const recibirPeso = async (device) => {
     try {
       let messages = await device.available();
@@ -83,16 +86,16 @@ export default function ConexionBalanza(props) {
         setFieldValue("pesoOriginal", pesoOriginal.split("kg", 2)[0]);
         setFieldValue(
           "peso",
-          parseFloat(pesoOriginal.split("kg", 2)[0]) - valores.dcto
+          roundToTwo(parseFloat(pesoOriginal.split("kg", 2)[0]) - valores.dcto)
         );
         setFieldValue("bluetooth", true);
-
         await device.clear();
       } else {
         recibirPeso(device);
       }
       setLoading(false);
     } catch (e) {
+      setLoading(false);
       console.log(e);
     }
   };
@@ -109,12 +112,11 @@ export default function ConexionBalanza(props) {
           }
         );
         const conected = await device.isConnected();
-        setConectedDevice(conected);
         if (conected) {
           const peso = await recibirPeso(device);
+          setLoading(false);
         } else {
           setLoading(false);
-          setConectedDevice(false);
           setMessage("Error al conectar con el dispositivo Bluetooth");
           setOpenSnackbar(true);
         }
@@ -128,7 +130,6 @@ export default function ConexionBalanza(props) {
     } catch (e) {
       console.log(e);
       setLoading(false);
-      setConectedDevice(false);
       setMessage("Error al conectar con el dispositivo Bluetooth");
       setOpenSnackbar(true);
     }

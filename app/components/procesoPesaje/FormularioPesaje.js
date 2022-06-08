@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, Dimensions, Text, View } from "react-native";
 import { TextInput, Paragraph } from "react-native-paper";
-import Autocomplete from "react-native-autocomplete-input";
-import { Input, Icon, Button } from "react-native-elements";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { Icon } from "react-native-elements";
 import { FormikProvider } from "formik";
 import { Picker } from "@react-native-picker/picker";
 
@@ -13,18 +11,32 @@ export default function FormularioPesaje(props) {
   const [isSelected, setIsSelected] = useState(true);
   const { setValues, values } = formik;
 
+  function roundToTwo(num) {
+    return +(Math.round(num + "e+2") + "e-2");
+  }
+
   const handleValueChange = (itemValue) => {
     setSelectedBandeja(itemValue);
-    console.log(itemValue);
     if (itemValue !== "") {
       const bandeja = bandejas.find((bandeja) => bandeja.id === itemValue);
 
-      setValues({ ...values, ...bandeja });
-      console.log(parseFloat(values.pesoOriginal) >= 0);
       if (parseFloat(values.pesoOriginal) >= 0) {
+        const resta = parseFloat(values.pesoOriginal) - bandeja.dcto;
         setValues({
           ...values,
-          peso: parseFloat(values.pesoOriginal) - bandeja.dcto,
+          peso: roundToTwo(resta),
+          cuid: bandeja.cuid,
+          dcto: bandeja.dcto,
+          id: bandeja.id,
+          nombre: bandeja.nombre,
+        });
+      } else {
+        setValues({
+          ...values,
+          cuid: bandeja.cuid,
+          dcto: bandeja.dcto,
+          id: bandeja.id,
+          nombre: bandeja.nombre,
         });
       }
 
@@ -42,7 +54,7 @@ export default function FormularioPesaje(props) {
       if (valor && str !== "") {
         setValues({
           ...values,
-          peso: parseFloat(str) - values.dcto,
+          peso: roundToTwo(parseFloat(str) - values.dcto),
           bluetooth: false,
         });
       } else {

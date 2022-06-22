@@ -9,6 +9,7 @@ import {
 import { TabView, SceneMap } from "react-native-tab-view";
 import Pesaje from "../components/procesoPesaje/Pesaje";
 import Categoria from "../components/procesoPesaje/Categoria";
+import Historial from "../components/procesoPesaje/Historial";
 
 export default function ProcesoPesaje(props) {
   const { user } = props;
@@ -18,6 +19,7 @@ export default function ProcesoPesaje(props) {
   const [routes] = React.useState([
     { key: "categoria", title: "Categoría" },
     { key: "pesaje", title: "Pesaje" },
+    { key: "historial", title: "Historial" },
   ]);
 
   const renderScene = ({ route }) => {
@@ -26,6 +28,8 @@ export default function ProcesoPesaje(props) {
         return <Categoria index={index} setIndex={setIndex} user={user} />;
       case "pesaje":
         return <Pesaje index={index} setIndex={setIndex} user={user} />;
+      case "historial":
+        return <Historial index={index} setIndex={setIndex} user={user} />;
       default:
         return null;
     }
@@ -36,6 +40,9 @@ export default function ProcesoPesaje(props) {
 
     const changeView = (i) => {
       if (index > i) {
+        setIndex(i);
+      }
+      if (index === 1 && i === 2) {
         setIndex(i);
       }
     };

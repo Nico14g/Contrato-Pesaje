@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { StyleSheet } from "react-native";
-import { Input, Icon, Button } from "react-native-elements";
+import { Input } from "react-native-elements";
 import { FormikProvider } from "formik";
 import { validateRut, formatRut, RutFormat } from "@fdograph/rut-utilities";
 

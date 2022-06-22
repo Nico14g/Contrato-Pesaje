@@ -14,6 +14,7 @@ import RNBluetoothClassic from "react-native-bluetooth-classic";
 import ConexionBalanza from "./ConexionBalanza";
 import { validateRut, formatRut, RutFormat } from "@fdograph/rut-utilities";
 import NfcManager from "react-native-nfc-manager";
+import * as Speech from "expo-speech";
 
 export default function Pesaje(props) {
   const { index, user } = props;
@@ -156,7 +157,6 @@ export default function Pesaje(props) {
         (registros) => registros.idRegistro === values.rut
       );
       if (registro) {
-        console.log(registro.acumulado, "esto está acumulado");
         const nuevoRegistro = {
           acumulado: registro.acumulado + peso,
           nombreTemporero: values.nombreTemporero.split(" ", 2)[0],
@@ -177,6 +177,53 @@ export default function Pesaje(props) {
       categoriaSelected.item.registros.push(vacio);
       return vacio;
     }
+  };
+
+  const obtenerAcumuladoDia = (registrosTemporero) => {
+    let acumulado = 0;
+    registrosTemporero.map((registro) => {
+      const fecha = registro.fecha.toDate();
+      if (
+        fecha.getFullYear() === new Date().getFullYear() &&
+        fecha.getMonth() === new Date().getMonth() &&
+        fecha.getDate() === new Date().getDate()
+      ) {
+        acumulado = acumulado + registro.peso;
+      }
+    });
+    return acumulado;
+  };
+
+  const escuchar = async (registro) => {
+    let registrosTemporero = [];
+    const wr = await firestore()
+      .collection(
+        "categoria/" +
+          categoriaSelected.item.idCategoria +
+          "/registros/" +
+          values.rut +
+          "/registrosTemporero"
+      )
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((documentSnapshot) => {
+          registrosTemporero.push(documentSnapshot.data());
+        });
+      });
+
+    const acumuladoDia = obtenerAcumuladoDia(registrosTemporero);
+
+    const texto =
+      values.nombreTemporero +
+      ", Rut: " +
+      values.rut +
+      ", Hoy ha acumulado " +
+      acumuladoDia +
+      " kilogramos, y en total a pesado " +
+      registro.acumulado +
+      " kilogramos";
+    Speech.stop();
+    Speech.speak(texto);
   };
 
   const validacionUsuario = () => {
@@ -236,7 +283,7 @@ export default function Pesaje(props) {
                 "/registrosTemporero"
             )
             .add(data);
-
+          await escuchar(registro);
           setLoading(false);
           setMessage("Información Guardada");
           setOpenSnackbar(true);

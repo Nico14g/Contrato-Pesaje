@@ -9,6 +9,7 @@ export const SnackBar = (props) => {
     <View style={styles.container}>
       <Snackbar
         visible={open}
+        duration={4000}
         onDismiss={() => setOpen(false)}
         action={{
           label: "Cerrar",

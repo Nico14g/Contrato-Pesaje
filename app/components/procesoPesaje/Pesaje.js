@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, StyleSheet, Dimensions, FlatList } from "react-native";
-import { readData } from "../../utilidades/variablesGlobales";
+import { readData, storeData } from "../../utilidades/variablesGlobales";
 import { Icon, Button, Text, Divider } from "react-native-elements";
 import { Title } from "react-native-paper";
 import { useFormik } from "formik";
@@ -15,6 +15,8 @@ import ConexionBalanza from "./ConexionBalanza";
 import { validateRut, formatRut, RutFormat } from "@fdograph/rut-utilities";
 import NfcManager from "react-native-nfc-manager";
 import * as Speech from "expo-speech";
+import ModalCreacionTemporero from "./ModalCreacionTemporero";
+import ModalCerrarCosecha from "./ModalCerrarCosecha";
 
 export default function Pesaje(props) {
   const { index, user } = props;
@@ -25,6 +27,8 @@ export default function Pesaje(props) {
   const [mostrarLecturaNFC, setMostrarLecturaNFC] = useState(false);
   const [mostrarEnlaceNFC, setMostrarEnlaceNFC] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [openCreacionTemporero, setOpenCreacionTemporero] = useState(false);
+  const [openCerrarCosecha, setOpenCerrarCosecha] = useState(false);
   const [message, setMessage] = useState("");
   const [permiso, setPermiso] = useState(false);
   const [errorPeso, setErrorPeso] = useState(false);
@@ -42,6 +46,7 @@ export default function Pesaje(props) {
   useEffect(() => {
     if (componentMounted.current) {
       const cuid = user.rol === "company" ? user.uid : user.cuid;
+
       firestore()
         .collection("bandeja")
         .where("cuid", "==", cuid)
@@ -61,28 +66,23 @@ export default function Pesaje(props) {
   }, [user.uid, user.cuid, user.rol, user.rut]);
 
   useEffect(() => {
-    if (componentMounted.current) {
-      const cuid = user.rol === "company" ? user.uid : user.cuid;
-      firestore()
-        .collection("usuarios")
-        .where("cuid", "==", cuid)
-        .onSnapshot((querySnapshot) => {
-          let temporeros = [];
-          querySnapshot.forEach((doc) => {
-            if (
-              doc.data().rut !== user.rut &&
-              doc.data().rol === "harvester" &&
-              doc.data().habilitado === true
-            ) {
-              temporeros.push(doc.data());
-            }
-          });
-          setTemporeros(temporeros);
+    const cuid = user.rol === "company" ? user.uid : user.cuid;
+    firestore()
+      .collection("usuarios")
+      .where("cuid", "==", cuid)
+      .onSnapshot((querySnapshot) => {
+        let temporeros = [];
+        querySnapshot.forEach((doc) => {
+          if (
+            doc.data().rut !== user.rut &&
+            doc.data().rol === "harvester" &&
+            doc.data().habilitado === true
+          ) {
+            temporeros.push(doc.data());
+          }
         });
-    }
-    return () => {
-      componentMounted.current = false;
-    };
+        setTemporeros(temporeros);
+      });
   }, [user.uid, user.cuid, user.rol, user.rut]);
 
   const disponible = async () => {
@@ -142,7 +142,7 @@ export default function Pesaje(props) {
 
   const { values } = formik;
 
-  const obtenerRegistros = (categoriaSelected) => {
+  const obtenerRegistros = async (categoriaSelected) => {
     const peso = isNaN(parseFloat(values.peso)) ? 0 : parseFloat(values.peso);
     const vacio = {
       acumulado: peso,
@@ -151,8 +151,8 @@ export default function Pesaje(props) {
       idRegistro: values.rut,
       ultimoRegistro: new Date(),
     };
+
     if (categoriaSelected.item.registros.length > 0) {
-      //cambiar mi rut
       const registro = categoriaSelected.item.registros.find(
         (registros) => registros.idRegistro === values.rut
       );
@@ -168,19 +168,27 @@ export default function Pesaje(props) {
         categoriaSelected.item.registros[index].acumulado =
           registro.acumulado + peso;
 
+        await storeData(categoriaSelected, "@categoriaSelect");
         return nuevoRegistro;
       } else {
         categoriaSelected.item.registros.push(vacio);
+        await storeData(categoriaSelected, "@categoriaSelect");
         return vacio;
       }
     } else {
       categoriaSelected.item.registros.push(vacio);
+      await storeData(categoriaSelected, "@categoriaSelect");
       return vacio;
     }
   };
 
+  function roundToTwo(num) {
+    return +(Math.round(num + "e+2") + "e-2");
+  }
+
   const obtenerAcumuladoDia = (registrosTemporero) => {
     let acumulado = 0;
+
     registrosTemporero.map((registro) => {
       const fecha = registro.fecha.toDate();
       if (
@@ -196,7 +204,7 @@ export default function Pesaje(props) {
 
   const escuchar = async (registro) => {
     let registrosTemporero = [];
-    const wr = await firestore()
+    await firestore()
       .collection(
         "categoria/" +
           categoriaSelected.item.idCategoria +
@@ -215,12 +223,10 @@ export default function Pesaje(props) {
 
     const texto =
       values.nombreTemporero +
-      ", Rut: " +
-      values.rut +
       ", Hoy ha acumulado " +
-      acumuladoDia +
+      roundToTwo(acumuladoDia) +
       " kilogramos, y en total a pesado " +
-      registro.acumulado +
+      roundToTwo(registro.acumulado) +
       " kilogramos";
     Speech.stop();
     Speech.speak(texto);
@@ -255,12 +261,14 @@ export default function Pesaje(props) {
       } else {
         if (!validacionUsuario()) {
           setLoading(false);
-          setMessage("Temporero no Registrado");
-          setOpenSnackbar(true);
+          setOpenCreacionTemporero(true);
         } else {
-          const registro = obtenerRegistros(categoriaSelected);
+          const registro = await obtenerRegistros(categoriaSelected);
 
-          await firestore()
+          setMessage("Información Guardada");
+          setOpenSnackbar(true);
+          setLoading(false);
+          firestore()
             .collection(
               "categoria/" + categoriaSelected.item.idCategoria + "/registros"
             )
@@ -274,7 +282,7 @@ export default function Pesaje(props) {
             peso: values.peso,
             bluetooth: values.bluetooth,
           };
-          await firestore()
+          firestore()
             .collection(
               "categoria/" +
                 categoriaSelected.item.idCategoria +
@@ -283,10 +291,8 @@ export default function Pesaje(props) {
                 "/registrosTemporero"
             )
             .add(data);
-          await escuchar(registro);
-          setLoading(false);
-          setMessage("Información Guardada");
-          setOpenSnackbar(true);
+
+          escuchar(registro);
         }
       }
     } else {
@@ -315,28 +321,6 @@ export default function Pesaje(props) {
     }
   };
 
-  const terminarCosecha = async () => {
-    setLoadingTCosecha(true);
-    const categoria = {
-      cuid: categoriaSelected.item.cuid,
-      fechaInicio: new Date(
-        categoriaSelected.item.fechaInicio.seconds * 1000 +
-          categoriaSelected.item.fechaInicio.nanoseconds / 1000000
-      ),
-      fechaTermino: new Date(),
-      idCategoria: categoriaSelected.item.idCategoria,
-      nombreCategoria: categoriaSelected.item.nombreCategoria,
-    };
-
-    await firestore()
-      .collection("categoria")
-      .doc(categoriaSelected.item.idCategoria)
-      .set(categoria);
-    setLoadingTCosecha(false);
-    setMessage("Cosecha: " + categoria.nombreCategoria + " terminada.");
-    categoriaSelected.item.fechaTermino = new Date();
-    setOpenSnackbar(true);
-  };
   return (
     <>
       <FlatList
@@ -429,7 +413,9 @@ export default function Pesaje(props) {
                     }
                     title="  Finalizar Cosecha"
                     loading={loadingTCosecha}
-                    onPress={() => (loadingTCosecha ? null : terminarCosecha())}
+                    onPress={() =>
+                      loadingTCosecha ? null : setOpenCerrarCosecha(true)
+                    }
                   ></Button>
                 </View>
               )}
@@ -460,6 +446,28 @@ export default function Pesaje(props) {
           open={openSnackbar}
           setOpen={setOpenSnackbar}
           message={message}
+        />
+      )}
+      {openCreacionTemporero && (
+        <ModalCreacionTemporero
+          open={openCreacionTemporero}
+          setOpen={setOpenCreacionTemporero}
+          nombreTemporero={values.nombreTemporero}
+          rutTemporero={values.rut}
+          setOpenSnackbar={setOpenSnackbar}
+          setMessage={setMessage}
+          user={user}
+        />
+      )}
+      {openCerrarCosecha && (
+        <ModalCerrarCosecha
+          open={openCerrarCosecha}
+          setOpen={setOpenCerrarCosecha}
+          categoriaSelected={categoriaSelected}
+          setLoadingTCosecha={setLoadingTCosecha}
+          setOpenSnackbar={setOpenSnackbar}
+          setMessage={setMessage}
+          user={user}
         />
       )}
     </>

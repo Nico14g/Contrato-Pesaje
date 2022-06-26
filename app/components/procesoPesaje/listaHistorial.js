@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Card, Icon } from "react-native-elements";
-import { storeData } from "../../utilidades/variablesGlobales";
 import * as Speech from "expo-speech";
 
 import { size } from "lodash";
@@ -23,7 +22,7 @@ export default function ListaHistorial(props) {
     if (componentMounted.current) {
       setTimeout(() => {
         setCargado(true);
-      }, 2000);
+      }, 1000);
     }
     return () => {
       componentMounted.current = false;
@@ -70,6 +69,10 @@ const options = {
 function Lista(props) {
   const { registro, setIndex } = props;
 
+  function roundToTwo(num) {
+    return +(Math.round(num + "e+2") + "e-2");
+  }
+
   const obtenerAcumuladoDia = () => {
     let acumulado = 0;
     registro.item.registrosTemporero.map((registro) => {
@@ -91,16 +94,15 @@ function Lista(props) {
       registro.item.nombreTemporero +
       " " +
       registro.item.apellidoTemporero +
-      ", Rut: " +
-      registro.item.idRegistro +
       ", Hoy ha acumulado " +
-      acumuladoDia +
+      roundToTwo(acumuladoDia) +
       " kilogramos, y en total a pesado " +
-      registro.item.acumulado +
+      roundToTwo(registro.item.acumulado) +
       " kilogramos";
     Speech.stop();
     Speech.speak(texto);
   };
+
   return (
     <TouchableOpacity onPress={() => escuchar()}>
       <Card>
@@ -114,11 +116,11 @@ function Lista(props) {
             <Text style={styles.nombreText}>{registro.item.idRegistro}</Text>
           </View>
           <View style={styles.colB}>
-            <Text style={styles.nombreText}>{registro.item.acumulado} KG</Text>
-            <Text style={styles.textoFecha}>
-              {registro.item.ultimoRegistro
-                .toDate()
-                .toLocaleDateString("es-CL", options)}
+            <Text style={styles.nombreText}>
+              Hoy: {roundToTwo(obtenerAcumuladoDia())} KG
+            </Text>
+            <Text style={styles.nombreText}>
+              Total: {roundToTwo(registro.item.acumulado)} KG
             </Text>
           </View>
           <View style={styles.colC}>

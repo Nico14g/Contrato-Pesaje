@@ -7,7 +7,7 @@ import ModalCategoria from "../../components/categoria/ModalCategoria";
 import { SnackBar } from "../../utilidades/Snackbar";
 
 export default function Categoria(props) {
-  const { setIndex, user } = props;
+  const { setIndex, user, index } = props;
   const [search, setSearch] = useState("");
   const componentMounted = useRef(true);
   const [cagando, setCargado] = useState(false);
@@ -64,7 +64,7 @@ export default function Categoria(props) {
           setCategorias(categorias.sort(porFecha));
         }
       });
-  }, [user.uid, user.cuid, user.rol, user.rut]);
+  }, [user.uid, user.cuid, user.rol, user.rut, index]);
 
   // useEffect(() => {
   //   const cuid = user.rol === "company" ? user.uid : user.cuid;
@@ -94,7 +94,7 @@ export default function Categoria(props) {
   //           );
   //         });
   //       });
-  //       categorias.push({ ...doc.data(), registers: registers });
+  //       categorias.push({ ...data(), registers: registers });
   //       registros.push(registers);
   //     });
 

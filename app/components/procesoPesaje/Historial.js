@@ -16,11 +16,9 @@ export default function Historial(props) {
   const [open, setOpen] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [registros, setRegistros] = useState([]);
-  const [registrosTemporero, setRegistrosTemporero] = useState([]);
   const [message, setMessage] = useState("");
   const [loaded, setLoaded] = useState(false);
   const [categoriaSelected, setCategoriaSelected] = useState("");
-  const [temporeros, setTemporeros] = useState([]);
 
   const STORAGE_KEY = "@categoriaSelect";
 
@@ -31,32 +29,8 @@ export default function Historial(props) {
   }, [index]);
 
   useEffect(() => {
-    if (componentMounted.current) {
-      const cuid = user.rol === "company" ? user.uid : user.cuid;
-      firestore()
-        .collection("usuarios")
-        .where("cuid", "==", cuid)
-        .onSnapshot((querySnapshot) => {
-          let temporeros = [];
-          querySnapshot.forEach((doc) => {
-            if (
-              doc.data().rut !== user.rut &&
-              doc.data().rol === "harvester" &&
-              doc.data().habilitado === true
-            ) {
-              temporeros.push(doc.data());
-            }
-          });
-          setTemporeros(temporeros);
-        });
-    }
-    return () => {
-      componentMounted.current = false;
-    };
-  }, [user.uid, user.cuid, user.rol, user.rut]);
-
-  useEffect(() => {
-    if (categoriaSelected !== "") {
+    if (categoriaSelected.item !== "" && categoriaSelected.item !== undefined) {
+      setLoaded(false);
       let registros = [];
       firestore()
         .collection(
@@ -82,24 +56,13 @@ export default function Historial(props) {
                   registrosTemporero: registrosTemporero,
                 });
                 setRegistros(registros);
-                setRegistrosTemporero((a) => [...a, registrosTemporero]);
                 setLoaded(true);
               });
           });
         });
-
-      //console.log(registrosTemporero, "registrosTemporero");
     }
-  }, [user.uid, user.cuid, user.rol, user.rut, categoriaSelected]);
+  }, [user.uid, user.cuid, user.rol, user.rut, index]);
 
-  //console.log(registros, "registros");
-  function porFecha(a, b) {
-    if (a.fechaTermino === "") {
-      return -1;
-    } else {
-      return 1;
-    }
-  }
   return (
     <>
       <View style={styles.container}>

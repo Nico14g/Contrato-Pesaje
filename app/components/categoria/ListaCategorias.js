@@ -23,7 +23,7 @@ export default function ListaCategorias(props) {
     if (componentMounted.current) {
       setTimeout(() => {
         setCargado(true);
-      }, 2000);
+      }, 1000);
     }
     return () => {
       componentMounted.current = false;

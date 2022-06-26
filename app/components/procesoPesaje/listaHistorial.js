@@ -41,7 +41,7 @@ export default function ListaHistorial(props) {
         />
       ) : cargado ? (
         <View style={styles.loaderContratos}>
-          <Text style={styles.texto}>No se han encontrado categorías</Text>
+          <Text style={styles.texto}>No se han encontrado registros</Text>
           <Icon
             name="text-box-remove-outline"
             type="material-community"

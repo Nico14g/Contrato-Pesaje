@@ -12,12 +12,10 @@ export default function Historial(props) {
   const { index, setIndex, user } = props;
   const [search, setSearch] = useState("");
   const componentMounted = useRef(true);
-  const [categorias, setCategorias] = useState([]);
   const [open, setOpen] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [registros, setRegistros] = useState([]);
   const [message, setMessage] = useState("");
-  const [loaded, setLoaded] = useState(false);
   const [categoriaSelected, setCategoriaSelected] = useState("");
 
   const STORAGE_KEY = "@categoriaSelect";
@@ -30,7 +28,6 @@ export default function Historial(props) {
 
   useEffect(() => {
     if (categoriaSelected.item !== "" && categoriaSelected.item !== undefined) {
-      setLoaded(false);
       let registros = [];
       firestore()
         .collection(
@@ -56,7 +53,6 @@ export default function Historial(props) {
                   registrosTemporero: registrosTemporero,
                 });
                 setRegistros(registros);
-                setLoaded(true);
               });
           });
         });
@@ -79,27 +75,25 @@ export default function Historial(props) {
         value={search}
       />
 
-      {loaded && (
-        <ListaHistorial
-          registros={
-            search === ""
-              ? registros
-              : registros.filter(
-                  (registro) =>
-                    registro.nombreTemporero
-                      .toLowerCase()
-                      .includes(search.toLowerCase()) ||
-                    registro.apellidoTemporero
-                      .toLowerCase()
-                      .includes(search.toLowerCase()) ||
-                    formatRut(registro.idRegistro, RutFormat.DASH)
-                      .toLowerCase()
-                      .includes(search.toLowerCase())
-                )
-          }
-          setIndex={setIndex}
-        ></ListaHistorial>
-      )}
+      <ListaHistorial
+        registros={
+          search === ""
+            ? registros
+            : registros.filter(
+                (registro) =>
+                  registro.nombreTemporero
+                    .toLowerCase()
+                    .includes(search.toLowerCase()) ||
+                  registro.apellidoTemporero
+                    .toLowerCase()
+                    .includes(search.toLowerCase()) ||
+                  formatRut(registro.idRegistro, RutFormat.DASH)
+                    .toLowerCase()
+                    .includes(search.toLowerCase())
+              )
+        }
+        setIndex={setIndex}
+      ></ListaHistorial>
       {open && (
         <ModalCategoria
           open={open}

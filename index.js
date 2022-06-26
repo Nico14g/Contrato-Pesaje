@@ -2,11 +2,12 @@ import "expo-dev-client";
 
 import "react-native-gesture-handler";
 import { registerRootComponent } from "expo";
-import firestore from "@react-native-firebase/firestore";
+import firestore, { firebase } from "@react-native-firebase/firestore";
 
 async function bootstrap() {
   await firestore().settings({
     persistence: true,
+    cacheSizeBytes: firestore.CACHE_SIZE_UNLIMITED,
   });
 }
 

@@ -5,7 +5,7 @@ import { Icon, Button, Text, Divider } from "react-native-elements";
 import { Title } from "react-native-paper";
 import { useFormik } from "formik";
 import FormularioTemporero from "./FormularioTemporero";
-import firestore from "@react-native-firebase/firestore";
+import firestore, { firebase } from "@react-native-firebase/firestore";
 import FormularioPesaje from "./FormularioPesaje";
 import LecturaNFC from "./nfc/LecturaNFC";
 import ModalEnlace from "./ModalEnlace";
@@ -202,9 +202,10 @@ export default function Pesaje(props) {
     return acumulado;
   };
 
-  const escuchar = async (registro) => {
+  const escuchar = async (registro, data) => {
     let registrosTemporero = [];
-    await firestore()
+
+    let registers = await firestore()
       .collection(
         "categoria/" +
           categoriaSelected.item.idCategoria +
@@ -212,13 +213,34 @@ export default function Pesaje(props) {
           values.rut +
           "/registrosTemporero"
       )
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((documentSnapshot) => {
-          registrosTemporero.push(documentSnapshot.data());
-        });
-      });
+      .get();
+    registers.forEach((documentSnapshot) =>
+      registrosTemporero.push(documentSnapshot.data())
+    );
 
+    // await firestore()
+    //   .collection(
+    //     "categoria/" +
+    //       categoriaSelected.item.idCategoria +
+    //       "/registros/" +
+    //       values.rut +
+    //       "/registrosTemporero"
+    //   )
+    //   .get()
+    //   .then((querySnapshot) => {
+    //     querySnapshot.forEach((documentSnapshot) => {
+    //       registrosTemporero.push(documentSnapshot.data());
+    //     });
+    //   });
+
+    const encontrado = registrosTemporero.find(
+      (registro) => registro.fecha.toDate().toString() === data.fecha.toString()
+    );
+
+    if (encontrado === undefined) {
+      data.fecha = firestore.Timestamp.fromDate(data.fecha);
+      registrosTemporero.push(data);
+    }
     const acumuladoDia = obtenerAcumuladoDia(registrosTemporero);
 
     const texto =
@@ -265,9 +287,6 @@ export default function Pesaje(props) {
         } else {
           const registro = await obtenerRegistros(categoriaSelected);
 
-          setMessage("Información Guardada");
-          setOpenSnackbar(true);
-          setLoading(false);
           firestore()
             .collection(
               "categoria/" + categoriaSelected.item.idCategoria + "/registros"
@@ -292,7 +311,10 @@ export default function Pesaje(props) {
             )
             .add(data);
 
-          escuchar(registro);
+          await escuchar(registro, data);
+          setMessage("Información Guardada");
+          setOpenSnackbar(true);
+          setLoading(false);
         }
       }
     } else {
